@@ -13,10 +13,6 @@
 
 
 // LIAM WAS HERE Liam is gay
-// I was here again
-
-
-
 
 //---------------------------------------------------------------------------
 //----- include libraries
