@@ -212,6 +212,9 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 	void setKeyDirection(int k, int& dx, int& dy);
 	assert(isArrowKey(key));
 	
+	void removeBombs();
+	void explodeBombs();
+
 	//reset message to blank
 	mess = "                                         ";		//reset message to blank
 
@@ -236,7 +239,7 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 			break;
 		case BOMB:
 			mess = "BOMB!";
-			explodeBomb();
+			explodeBombs();
 			break;
 		}
 	}
@@ -247,7 +250,7 @@ void removeBombs()
 	//The detonator was walked on
 }
 
-void explodeBomb()
+void explodeBombs()
 {
 	//A bear stepped on a bomb
 }
