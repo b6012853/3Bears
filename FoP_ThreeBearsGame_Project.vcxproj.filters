@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConsoleUtils.cpp">
+    <ClCompile Include="ThreeBearsGame_Skeleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ThreeBearsGame_Skeleton.cpp">
+    <ClCompile Include="..\..\..\Downloads\4374_Task1c_ThreeBearsGame_SKELETON\ConsoleUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

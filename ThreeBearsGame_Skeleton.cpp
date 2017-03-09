@@ -230,8 +230,26 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 			cout << '\a';	//beep the alarm
 			mess = "CANNOT GO THERE!";
 			break;
+		case DETONATOR:
+			mess = "DETONATOR!";
+			removeBombs();
+			break;
+		case BOMB:
+			mess = "BOMB!";
+			explodeBomb();
+			break;
 		}
 	}
+}
+
+void removeBombs()
+{
+	//The detonator was walked on
+}
+
+void explodeBomb()
+{
+	//A bear stepped on a bomb
 }
 //---------------------------------------------------------------------------
 //----- process key
