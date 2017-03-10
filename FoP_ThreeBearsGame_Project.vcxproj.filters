@@ -21,6 +21,9 @@
     <ClCompile Include="..\..\..\Downloads\4374_Task1c_ThreeBearsGame_SKELETON\ConsoleUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConsoleUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtils.h">
