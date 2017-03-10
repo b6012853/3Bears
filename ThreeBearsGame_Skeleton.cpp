@@ -210,8 +210,13 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
+	void setMaze(char grid[][SIZEX], const char maze[][SIZEX]);
 	assert(isArrowKey(key));
 	
+	char maze[SIZEY][SIZEX];
+	setMaze(maze, g);
+
+
 	void removeBombs();
 	void explodeBombs();
 
@@ -223,9 +228,10 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 	setKeyDirection(key, dx, dy); 
 	for (auto &bear : bears){
 		//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-		switch (g[bear.y + dy][bear.x + dx])
+		switch (maze[bear.y + dy][bear.x + dx])
 		{			//...depending on what's on the target position in grid...
 		case TUNNEL:		//can move
+			maze[bear.y][bear.x] = TUNNEL;
 			bear.y += dy;	//go in that Y direction
 			bear.x += dx;	//go in that X direction
 			break;
