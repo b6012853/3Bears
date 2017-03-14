@@ -54,7 +54,12 @@ struct Item {
 	int x, y;
 	char symbol;
 	bool visible;
+};
+
+struct Bomb {
+	Item item;
 	int colour;
+	bool active;
 };
 
 struct Bear {
@@ -70,13 +75,13 @@ struct Bear {
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bear);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bear, vector<Bomb>& bombs);
 	void paintGame(const char g[][SIZEX], string mess);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], vector<Item>& bear, const int key, string& mess);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Item> bear);
+	void updateGameData(const char g[][SIZEX], vector<Item>& bear, vector<Bomb>& bombs, const int key, string& mess);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Item> bear, const vector<Bomb> bombs);
 	void endProgram();
 
 	//local variable declarations 
@@ -89,23 +94,23 @@ int main()
 	bears.push_back(Item());
 	bears.push_back(Item()); 
 
-	vector<Item> bombs;
+	vector<Bomb> bombs;
 	for (int i = 0; i < 6; i++)
 	{
-		bombs.push_back(Item()); //Item 0 detenator, 1+ are bombs
+		bombs.push_back(Bomb()); //Item 0 detenator, 1+ are bombs
 	}
 
 
 	//action...
-	initialiseGame(grid, maze, bears);	//initialise grid (incl. walls & bear)
+	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
-			updateGameData(grid, bears, key, message);		//move bear in that direction
-			updateGrid(grid, maze, bears);			//update grid information
+			updateGameData(grid, bears, bombs, key, message);		//move bear in that direction
+			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
@@ -121,15 +126,15 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Item>& bears)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Item>& bears, vector<Bomb>& bombs)
 { //initialise grid & place bear in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& b);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item> b);
+	void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& bears, vector<Bomb>& bombs);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item> bears, vector<Bomb> bombs);
 
 	setInitialMazeStructure(maze);		//initialise maze
-	setInitialDataFromMaze(maze, bears);	//initialise bear's position
-	updateGrid(grid, maze, bears);		//prepare grid
+	setInitialDataFromMaze(maze, bears, bombs);	//initialise bear's position
+	updateGrid(grid, maze, bears, bombs);		//prepare grid
 }
 
 void setInitialMazeStructure(char maze[][SIZEX])
@@ -161,9 +166,10 @@ void setInitialMazeStructure(char maze[][SIZEX])
 				case 5: maze[row][col] = EXIT; break;
 			}
 }
-void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& bears)
+void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& bears, vector<Bomb>& bombs)
 { //extract bear's coordinates from initial maze info
 	int noOfBears = 0;
+	int noOfBombs = 1; //Start from 1 as 0 is the detonator.
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (maze[row][col])
@@ -176,8 +182,29 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& bears)
 					bears[noOfBears].visible = true;
 					noOfBears++;
 					maze[row][col] = TUNNEL;
+					break;
 				}
-				break;
+				case DETONATOR:
+				{		
+					bombs[0].item.x = col;
+					bombs[0].item.y = row;
+					bombs[0].item.symbol = DETONATOR;
+					bombs[0].item.visible = true;
+					bombs[0].colour = clYellow;
+					bombs[0].active = false;
+					break;
+				}
+				case BOMB:
+				{
+					bombs[noOfBombs].item.x = col;
+					bombs[noOfBombs].item.y = row;
+					bombs[noOfBombs].item.symbol = BOMB;
+					bombs[noOfBombs].item.visible = true;
+					bombs[noOfBombs].colour = clRed;
+					bombs[noOfBombs].active = true;
+					noOfBombs++;
+					break;
+				}
 				//will work for other items too
 			}
 }
@@ -186,15 +213,21 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& bears)
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Item> bears)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Item> bears, const vector<Bomb> bombs)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
 	void placeBear(char g[][SIZEX], const Item bear);
+	void placeBomb(char g[][SIZEX], const Bomb bomb);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
 	for (auto bear : bears)
 	{
 		placeBear(grid, bear);	//set bear in grid
+	}
+
+	for (auto bomb : bombs)
+	{
+		placeBomb(grid, bomb);
 	}
 }
 
@@ -210,10 +243,16 @@ void placeBear(char g[][SIZEX], const Item bear)
 	g[bear.y][bear.x] = bear.symbol;
 }
 
+void placeBomb(char g[][SIZEX], const Bomb bomb)
+{
+	if (bomb.item.visible)
+		g[bomb.item.y][bomb.item.x] = bomb.item.symbol;
+}
+
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, string& mess)
+void updateGameData(const char g[][SIZEX], vector<Item>& bears, vector<Bomb>& bombs, const int key, string& mess)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -224,7 +263,7 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 	setMaze(maze, g);
 
 
-	void removeBombs();
+	void removeBombs(vector<Bomb>& bombs);
 	void explodeBombs();
 
 	//reset message to blank
@@ -238,7 +277,14 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 		switch (maze[bear.y + dy][bear.x + dx])
 		{			//...depending on what's on the target position in grid...
 		case TUNNEL:		//can move
-			maze[bear.y][bear.x] = TUNNEL;
+			if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x)
+			{
+				bombs[0].active = false;
+				bombs[0].item.visible = true;
+			}
+			else
+				maze[bear.y][bear.x] = TUNNEL;
+
 			bear.y += dy;	//go in that Y direction
 			bear.x += dx;	//go in that X direction
 			break;
@@ -248,7 +294,11 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 			break;
 		case DETONATOR:
 			mess = "DETONATOR!";
-			removeBombs();
+			bombs[0].active = true;
+			bombs[0].item.visible = false;
+			bear.y += dy;	//go in that Y direction
+			bear.x += dx;	//go in that X direction
+			removeBombs(bombs);
 			break;
 		case BOMB:
 			mess = "BOMB!";
@@ -258,20 +308,14 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 	}
 }
 
-void removeBombs()
+void removeBombs(vector<Bomb>& bombs)
 {
 	//The detonator was walked on 
-	/*
-	for (int row=0; row < SIZEY; row++)
+	for (int b=0; b < 6; b++)
 	{
-		for (int col=0; col < SIZEX; col++)
-		{
-			if (g[row][col] == BOMB)
-			{
-				g[row][col] = TUNNEL;
-			}
-		}
-	} */
+		bombs[b].active = false;
+		bombs[b].item.visible = false;
+	}
 }
 
 void explodeBombs()
