@@ -18,15 +18,15 @@
     <ClCompile Include="ThreeBearsGame_Skeleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\4374_Task1c_ThreeBearsGame_SKELETON\ConsoleUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConsoleUtils.cpp">
+    <ClCompile Include="F:\Download\ConsoleUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Download\ConsoleUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

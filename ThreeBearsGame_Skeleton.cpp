@@ -54,6 +54,7 @@ struct Item {
 	int x, y;
 	char symbol;
 	bool visible;
+	int colour;
 };
 
 struct Bear {
@@ -87,6 +88,12 @@ int main()
 	bears.push_back(Item());
 	bears.push_back(Item());
 	bears.push_back(Item()); 
+
+	vector<Item> bombs;
+	for (int i = 0; i < 6; i++)
+	{
+		bombs.push_back(Item()); //Item 0 detenator, 1+ are bombs
+	}
 
 
 	//action...
@@ -253,12 +260,24 @@ void updateGameData(const char g[][SIZEX], vector<Item>& bears, const int key, s
 
 void removeBombs()
 {
-	//The detonator was walked on
+	//The detonator was walked on 
+	/*
+	for (int row=0; row < SIZEY; row++)
+	{
+		for (int col=0; col < SIZEX; col++)
+		{
+			if (g[row][col] == BOMB)
+			{
+				g[row][col] = TUNNEL;
+			}
+		}
+	} */
 }
 
 void explodeBombs()
 {
 	//A bear stepped on a bomb
+
 }
 //---------------------------------------------------------------------------
 //----- process key
