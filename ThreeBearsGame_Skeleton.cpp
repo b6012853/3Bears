@@ -291,8 +291,8 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			bear.x += dx;	//go in that X direction
 			break;
 		case WALL:  		//hit a wall and stay there
-			cout << '\a';	//beep the alarm
-			mess = "CANNOT GO THERE!";
+			//cout << '\a';	//beep the alarm
+			//mess = "CANNOT GO THERE!";
 			break;
 		case DETONATOR:
 			bombs[0].active = true;	//Activate the detonator
