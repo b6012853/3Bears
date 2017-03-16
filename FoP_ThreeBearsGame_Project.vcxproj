@@ -69,7 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtils.h" />
-    <ClInclude Include="F:\Download\ConsoleUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
