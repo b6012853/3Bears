@@ -18,7 +18,7 @@
     <ClCompile Include="ThreeBearsGame_Skeleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="F:\Download\ConsoleUtils.cpp">
+    <ClCompile Include="ConsoleUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
