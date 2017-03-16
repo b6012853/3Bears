@@ -192,6 +192,7 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[0].item.visible = true;
 					bombs[0].colour = clYellow;
 					bombs[0].active = false;
+					maze[row][col] = TUNNEL;
 					break;
 				}
 				case BOMB:
@@ -203,6 +204,7 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[noOfBombs].colour = clRed;
 					bombs[noOfBombs].active = true;
 					noOfBombs++;
+					maze[row][col] = TUNNEL;
 					break;
 				}
 				//will work for other items too
@@ -277,9 +279,9 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 		switch (maze[bear.y + dy][bear.x + dx])
 		{			//...depending on what's on the target position in grid...
 		case TUNNEL:		//can move
-			if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x)
+			if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
 			{
-				bombs[0].active = false;
+				bombs[0].active = false;	//Deactivate the detonator.
 				bombs[0].item.visible = true;
 			}
 			else
@@ -293,11 +295,10 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			mess = "CANNOT GO THERE!";
 			break;
 		case DETONATOR:
-			mess = "DETONATOR!";
-			bombs[0].active = true;
+			bombs[0].active = true;	//Activate the detonator
 			bombs[0].item.visible = false;
-			bear.y += dy;	//go in that Y direction
-			bear.x += dx;	//go in that X direction
+			bear.y += dy;	//move the bear onto the detonator
+			bear.x += dx;
 			removeBombs(bombs);
 			break;
 		case BOMB:
@@ -311,7 +312,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 void removeBombs(vector<Bomb>& bombs)
 {
 	//The detonator was walked on 
-	for (int b=0; b < 6; b++)
+	for (int b=0; b < bombs.size(); b++)
 	{
 		bombs[b].active = false;
 		bombs[b].item.visible = false;
