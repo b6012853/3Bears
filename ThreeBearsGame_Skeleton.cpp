@@ -66,6 +66,7 @@ struct Bear {
 	int x, y;
 	char symbol;
 	bool visible;
+	bool moved;
 };
 
 //---------------------------------------------------------------------------
@@ -287,7 +288,13 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 			bear.y += dy;	//go in that Y direction
 			bear.x += dx;	//go in that X direction
+			bear.moved = true;
 			break;
+		case BEAR:
+			for (auto &bear2 : bears)
+			{
+
+			}
 		case WALL:  		//hit a wall and stay there
 			cout << '\a';	//beep the alarm
 			mess = "CANNOT GO THERE!";
@@ -305,6 +312,9 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			explodeBombs();
 			break;
 		}
+	}
+	for (auto &bear : bears){ // reset moved variable for the next move
+		bear.moved = false;
 	}
 }
 
