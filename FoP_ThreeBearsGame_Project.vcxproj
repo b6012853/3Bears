@@ -64,7 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="F:\Download\ConsoleUtils.cpp" />
+    <ClCompile Include="ConsoleUtils.cpp" />
     <ClCompile Include="ThreeBearsGame_Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
