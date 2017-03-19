@@ -5,9 +5,7 @@
 //---------------------------------------------------------------------------
 
 /* TODO
-	Fix movement of bears when they are next to each other(grid does not change during the switch statment so the swicht statment thinks that previous bear did not move)
 	Let Bears go on bombs,detonator and exit
-	Make a seperate struct for bears
 	Add colours
 */
 
@@ -243,7 +241,8 @@ void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 
 void placeBear(char g[][SIZEX], const Bear bear)
 { //place bear at its new position in grid
-	g[bear.y][bear.x] = bear.symbol;
+	if (bear.visible)
+		g[bear.y][bear.x] = bear.symbol;
 }
 
 void placeBomb(char g[][SIZEX], const Bomb bomb)
@@ -305,7 +304,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 					{
 						if (bear2.moved)
 						{
-							bear.moved == true;
+							bear.moved = true;
 							moved++;
 						}
 					}
@@ -333,6 +332,19 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				mess = "BOMB!";
 				explodeBombs();
 				break;
+			case EXIT:
+				bear.y += dy;	//go in that Y direction
+				bear.x += dx;	//go in that X direction
+				for (unsigned int i = 0; i < bears.size(); i++)
+				{
+					if (maze[bear.y][bear.x] == EXIT)
+					{
+						bears.erase(bears.begin() + i);
+					}
+				}
+				//Add Rescued bar and increment rescued bears
+				break;
+
 			}
 		}
 	}
