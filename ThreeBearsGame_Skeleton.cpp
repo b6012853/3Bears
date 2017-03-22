@@ -272,7 +272,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
-	int dx(0), dy(0), moved(0);
+	int dx(0), dy(0), moved(0), deleteIndex(-1);
 	setKeyDirection(key, dx, dy); 
 	while (moved < bears.size())
 	{
@@ -337,11 +337,13 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			case EXIT:
 				bear.y += dy;	//go in that Y direction
 				bear.x += dx;	//go in that X direction
+				bear.moved = true;
+				moved++;
 				for (unsigned int i = 0; i < bears.size(); i++)
 				{
 					if (maze[bear.y][bear.x] == EXIT)
 					{
-						bears.erase(bears.begin() + i);
+						deleteIndex = i;
 					}
 				}
 				//Add Rescued bar and increment rescued bears
@@ -349,6 +351,10 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 			}
 		}
+	}
+	if (deleteIndex >= 0)
+	{
+		bears.erase(bears.begin() + deleteIndex);
 	}
 	for (auto &bear : bears){ // reset moved variable for the next move
 		bear.moved = false;
