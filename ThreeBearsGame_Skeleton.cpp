@@ -330,6 +330,8 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				break;
 			case BOMB:
 				mess = "BOMB!";
+				bear.moved = true;
+				moved++;
 				explodeBombs();
 				break;
 			case EXIT:
