@@ -75,7 +75,7 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
-	void paintGame(const char g[][SIZEX], string mess);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -102,7 +102,7 @@ int main()
 
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message);			//display game info, modified grid & messages
+	paintGame(grid, message, bears.size());			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
@@ -113,7 +113,7 @@ int main()
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message);		//display game info, modified grid & messages
+		paintGame(grid, message, bears.size());		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -343,7 +343,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				{
 					if (maze[bear.y][bear.x] == EXIT)
 					{
-						deleteIndex = i;
+						deleteIndex = i; // assign index of a bear to be deleted after remaing bears move
 					}
 				}
 				//Add Rescued bar and increment rescued bears
@@ -352,7 +352,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			}
 		}
 	}
-	if (deleteIndex >= 0)
+	if (deleteIndex >= 0) //delete bear
 	{
 		bears.erase(bears.begin() + deleteIndex);
 	}
@@ -439,7 +439,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -448,6 +448,13 @@ void paintGame(const char g[][SIZEX], string mess)
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c: February 2017");
+	//Rescued
+	string bearString = "";
+	for (int i = noOfBears; i < 3; i++)
+	{
+		bearString += "@";
+	}
+	showMessage(clGrey, clYellow, 0, 1, "RESCUED " + bearString);
 
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
