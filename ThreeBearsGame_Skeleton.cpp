@@ -327,10 +327,17 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				bear.moved = true;
 				moved++;
 				removeBombs(bombs);
+				//For some reason bears cannot enter the detonator
 				break;
 			case BOMB:
 				mess = "BOMB!";
 				explodeBombs();
+				if (!bear.moved)
+				{
+					bear.moved = true;
+					moved++;
+				}
+				break;
 				break;
 			case EXIT:
 				bear.y += dy;	//go in that Y direction
