@@ -82,6 +82,7 @@ int main()
 	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
+	void paintEntryScreen();
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -101,6 +102,9 @@ int main()
 
 	bool forceQuit = false;
 	int noOfMoves(0);
+
+	//Entry screen
+	paintEntryScreen();
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves);			//display game info, modified grid & messages
@@ -482,7 +486,21 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	// display grid contents
 	paintGrid(g);
 }
-
+void paintEntryScreen()
+{
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	int  getKeyPress();
+	string name = string("_", 20);
+	int index(0);
+	showMessage(clBlack, clWhite, 10, 5, name);
+	int key = getKeyPress();
+	while (key != 13 && name.size() <= 20)
+	{
+		//check if the character is backspace
+		showMessage(clBlack, clWhite, 10, 5, name);
+		key = getKeyPress();
+	}
+}
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	SelectBackColour(clBlack);
