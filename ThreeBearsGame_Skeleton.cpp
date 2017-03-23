@@ -476,8 +476,6 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
 	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
-
-	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES:" + to_string(noOfMoves));
 	showMessage(clGrey, clWhite, 40, 15, " GAME LEVEL 1 RULES:                ");
 	showMessage(clGrey, clWhite, 40, 16, " Rescue all bears '@' through       ");
 	showMessage(clGrey, clWhite, 40, 17, " exit 'X' avoiding bombs 'O'        ");
