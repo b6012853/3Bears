@@ -307,6 +307,13 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 							moved++;
 						}
 					}
+					else if (bear2.x == bear.x + (dx * 2) && bear2.y == bear.y + (dy * 2))
+					{
+						bear.y += dy;	//go in that Y direction
+						bear.x += dx;	//go in that X direction
+						moved++;
+						bear.moved = true;
+					}
 				}
 				break;
 			case WALL:  		//hit a wall and stay there
@@ -329,6 +336,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				break;
 			case BOMB:
 				forceQuit = true;
+				mess = "You just killed a bear, you sad person!  ";
 				bear.y += dy;	//move the bear onto the detonator
 				bear.x += dx;
 				bear.moved = true;
@@ -478,6 +486,6 @@ void paintGrid(const char g[][SIZEX])
 void endProgram()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	showMessage(clRed, clYellow, 40, 8, "");	//hold output screen until a keyboard key is hit
+	showMessage(clRed, clYellow, 40, 9, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
