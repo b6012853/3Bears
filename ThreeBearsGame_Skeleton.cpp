@@ -373,6 +373,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	{
 		forceQuit = true;
 	}
+	numberOfMoves++;
 	return forceQuit;
 }
 
