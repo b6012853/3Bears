@@ -463,15 +463,20 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c: February 2017");
 	//Rescued
 	string bearString = "";
+	int bears(0);
 	for (int i = noOfBears; i < 3; i++)
 	{
 		bearString += "@";
+		bears++;
 	}
 	showMessage(clGrey, clYellow, 0, 1, "RESCUED " + bearString);
 
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
+	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
+	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
+
 	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES:" + to_string(noOfMoves));
 	showMessage(clGrey, clWhite, 40, 15, " GAME LEVEL 1 RULES:                ");
 	showMessage(clGrey, clWhite, 40, 16, " Rescue all bears '@' through       ");
