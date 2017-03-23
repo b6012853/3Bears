@@ -519,7 +519,7 @@ void paintEntryScreen()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	int  getKeyPress();
-	string name = string("_", 20);
+	string name = "____________________";
 	int index(0);
 	showMessage(clBlack, clWhite, 10, 5, name);
 	int key = getKeyPress();
