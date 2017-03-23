@@ -75,11 +75,11 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
 
@@ -100,20 +100,21 @@ int main()
 	}
 
 	bool forceQuit = false;
+	int noOfMoves(0);
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, bears.size());			//display game info, modified grid & messages
+	paintGame(grid, message, bears.size(), noOfMoves);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key) && !forceQuit)			//while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
-			forceQuit = updateGameData(grid, bears, bombs, key, message);		//move bear in that direction
+			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
 			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message, bears.size());		//display game info, modified grid & messages
+		paintGame(grid, message, bears.size(), noOfMoves);		//display game info, modified grid & messages
 		if( !forceQuit ) key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -254,7 +255,7 @@ void placeBomb(char g[][SIZEX], const Bomb bomb)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -374,6 +375,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 		forceQuit = true;
 		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
 	}
+	numberOfMoves++;
 	return forceQuit;
 }
 
@@ -449,7 +451,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -469,6 +471,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears)
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
+	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES:" + to_string(noOfMoves));
 
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
