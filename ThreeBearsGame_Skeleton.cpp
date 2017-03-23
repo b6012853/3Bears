@@ -259,6 +259,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	void setMaze(char grid[][SIZEX], const char maze[][SIZEX]);
+	void endProgram();
 	bool forceQuit = false;
 	assert(isArrowKey(key));
 	
@@ -358,6 +359,10 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	}
 	for (auto &bear : bears){ // reset moved variable for the next move
 		bear.moved = false;
+	}
+	if (bears.empty())
+	{
+		forceQuit = true;
 	}
 	return forceQuit;
 }
