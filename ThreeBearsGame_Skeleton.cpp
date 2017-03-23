@@ -21,6 +21,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 //include our own libraries
@@ -48,7 +49,7 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
-const string playerFiles = "//players//";
+const string playerFiles = "\\players\\";
 
 struct Item {
 	int x, y;
@@ -92,6 +93,14 @@ int main()
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintEntryScreen();
+
+	Player p;
+	p.name = "Liam";
+	p.score = 500;
+	p.cheated = false;
+
+	void savePlayer(Player& player);
+	savePlayer(p);
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -454,12 +463,26 @@ bool wantsToQuit(const int key)
 
 void loadPlayer(Player& player)
 {
-
+	ifstream fin(playerFiles + player.name); //Open the file
+	if (fin.fail())	//Check if the open was successful.
+		cout << "Failed to open file: " + playerFiles + player.name;
+	else {
+		//  file open successfully: process the file
+		fin >> player.name >> player.score >> player.cheated;
+		fin.close();
+	}
 }
 
 void savePlayer(Player& player)
 {
-
+	ofstream fout(playerFiles + player.name, ios::out);
+	if (fout.fail())	//Check if the open was successful.
+		cout << "Failed to open file: " + playerFiles + player.name;
+	else {
+		//  file open successfully: process the file
+		fout << player.name << player.score << player.cheated;
+		fout.close();
+	}
 }
 
 //---------------------------------------------------------------------------
