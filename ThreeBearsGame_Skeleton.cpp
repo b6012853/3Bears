@@ -341,7 +341,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				moved++;
 				for (unsigned int i = 0; i < bears.size(); i++)
 				{
-					if (maze[bear.y][bear.x] == EXIT)
+					if (maze[bears[i].y][bears[i].x] == EXIT)
 					{
 						deleteIndex = i; // assign index of a bear to be deleted after remaing bears move
 					}
