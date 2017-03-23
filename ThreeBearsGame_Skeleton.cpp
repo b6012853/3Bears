@@ -67,6 +67,12 @@ struct Bear {
 	bool moved;
 };
 
+struct Player{
+	string name;
+	int score;
+	bool cheated;
+};
+
 //---------------------------------------------------------------------------
 //----- run game
 //---------------------------------------------------------------------------
@@ -433,6 +439,20 @@ bool isArrowKey(const int key)
 bool wantsToQuit(const int key)
 {	//check if the user wants to quit (when key is 'Q' or 'q')
 	return toupper(key) == QUIT;
+}
+
+//---------------------------------------------------------------------------
+//----- File access
+//---------------------------------------------------------------------------
+
+void loadPlayer(Player& player)
+{
+
+}
+
+void savePlayer(Player& player)
+{
+
 }
 
 //---------------------------------------------------------------------------
