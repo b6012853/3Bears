@@ -82,6 +82,7 @@ int main()
 	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintEntryScreen();
 
 	//local variable declarations 
@@ -479,7 +480,13 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
 	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
-
+	showMessage(clGrey, clWhite, 40, 15, " GAME LEVEL 1 RULES:                ");
+	showMessage(clGrey, clWhite, 40, 16, " Rescue all bears '@' through       ");
+	showMessage(clGrey, clWhite, 40, 17, " exit 'X' avoiding bombs 'O'        ");
+	showMessage(clGrey, clWhite, 40, 18, " To disable bombs use detonator 'T' ");
+	showMessage(clGrey, clWhite, 40, 19, "                                    ");
+	showMessage(clGrey, clWhite, 40, 20, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clGrey, clWhite, 40, 21, " TO QUIT ENTER 'Q'                  ");
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
