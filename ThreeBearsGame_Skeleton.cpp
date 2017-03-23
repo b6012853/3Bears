@@ -273,79 +273,45 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
-	int dx(0), dy(0), moved(0);
+	int dx(0), dy(0);
 	setKeyDirection(key, dx, dy); 
-	while (moved < 3){
-		for (auto &bear : bears){
-			//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-			switch (maze[bear.y + dy][bear.x + dx])
-			{			//...depending on what's on the target position in grid...
-			case TUNNEL:		//can move
-				if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
-				{
-					bombs[0].active = false;	//Deactivate the detonator.
-					bombs[0].item.visible = true;
-				}
-				else
-					maze[bear.y][bear.x] = TUNNEL;
-				if (!bear.moved)
-				{
-					bear.y += dy;	//go in that Y direction
-					bear.x += dx;	//go in that X direction
-					bear.moved = true;
-					moved++;
-				}
-				break;
-			case BEAR:
-				for (auto &bear2 : bears)
-				{
-					if (bear2.x == bear.x + dx && bear2.y == bear.y + dy)
-					{
-						if (bear2.moved)
-						{
-							if (!bear.moved)
-							{
-								bear.moved = true;
-								moved++;
-							}
-						}
-					}
-				}
-				break;
-			case WALL:  		//hit a wall and stay there
-				cout << '\a';	//beep the alarm
-				mess = "CANNOT GO THERE!";
-				if (!bear.moved)
-				{
-					bear.moved = true;
-					moved++;
-				}
-
-				break;
-			case DETONATOR:
-				bombs[0].active = true;	//Activate the detonator
-				bombs[0].item.visible = false;
-				if (!bear.moved)
-				{
-					bear.y += dy;	//move the bear onto the detonator
-					bear.x += dx;
-					bear.moved = true;
-					moved++;
-				}
-				removeBombs(bombs);
-				break;
-			case BOMB:
-				mess = "BOMB!";
-				if (!bear.moved)
-				{
-					bear.y += dy;	//move the bear onto the detonator
-					bear.x += dx;
-					bear.moved = true;
-					moved++;
-				}
-				explodeBombs();
-				break;
+	for (auto &bear : bears){
+		//check new target position in grid and update game data (incl. bear coordinates) if move is possible
+		switch (maze[bear.y + dy][bear.x + dx])
+		{			//...depending on what's on the target position in grid...
+		case TUNNEL:		//can move
+			if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
+			{
+				bombs[0].active = false;	//Deactivate the detonator.
+				bombs[0].item.visible = true;
 			}
+			else
+				maze[bear.y][bear.x] = TUNNEL;
+
+			bear.y += dy;	//go in that Y direction
+			bear.x += dx;	//go in that X direction
+			bear.moved = true;
+			break;
+		case BEAR:
+			for (auto &bear2 : bears)
+			{
+
+			}
+		case WALL:  		//hit a wall and stay there
+			//cout << '\a';	//beep the alarm
+			//mess = "CANNOT GO THERE!";
+			break;
+		case DETONATOR:
+			bombs[0].active = true;	//Activate the detonator
+			bombs[0].item.visible = false;
+			bear.y += dy;	//move the bear onto the detonator
+			bear.x += dx;
+			removeBombs(bombs);
+			break;
+		case BOMB:
+			mess = "BOMB!";
+			explodeBombs();
+			break;
 		}
 	}
 	for (auto &bear : bears){ // reset moved variable for the next move
