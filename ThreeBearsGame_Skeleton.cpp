@@ -260,6 +260,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	void setMaze(char grid[][SIZEX], const char maze[][SIZEX]);
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void endProgram();
 	bool forceQuit = false;
 	assert(isArrowKey(key));
@@ -372,6 +373,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	if (bears.empty())
 	{
 		forceQuit = true;
+		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
 	}
 	numberOfMoves++;
 	return forceQuit;
@@ -497,6 +499,6 @@ void paintGrid(const char g[][SIZEX])
 void endProgram()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	showMessage(clRed, clYellow, 40, 9, "");	//hold output screen until a keyboard key is hit
+	showMessage(clRed, clYellow, 40, 10, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
