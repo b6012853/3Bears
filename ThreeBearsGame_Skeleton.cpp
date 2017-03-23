@@ -79,7 +79,7 @@ int main()
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
 
@@ -99,16 +99,16 @@ int main()
 		bombs.push_back(Bomb()); //Item 0 detenator, 1+ are bombs
 	}
 
-
+	bool forceQuit = false;
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size());			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
-	while (!wantsToQuit(key))			//while user does not want to quit
+	while (!wantsToQuit(key) || !forceQuit)			//while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
-			updateGameData(grid, bears, bombs, key, message);		//move bear in that direction
+			forceQuit = updateGameData(grid, bears, bombs, key, message);		//move bear in that direction
 			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
 		else
@@ -254,11 +254,12 @@ void placeBomb(char g[][SIZEX], const Bomb bomb)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	void setMaze(char grid[][SIZEX], const char maze[][SIZEX]);
+	bool forceQuit = false;
 	assert(isArrowKey(key));
 	
 	char maze[SIZEY][SIZEX];
@@ -359,6 +360,7 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	for (auto &bear : bears){ // reset moved variable for the next move
 		bear.moved = false;
 	}
+	return forceQuit;
 }
 
 void removeBombs(vector<Bomb>& bombs)
