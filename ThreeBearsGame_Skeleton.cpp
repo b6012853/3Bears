@@ -5,9 +5,7 @@
 //---------------------------------------------------------------------------
 
 /* TODO
-	Fix movement of bears when they are next to each other(grid does not change during the switch statment so the swicht statment thinks that previous bear did not move)
 	Let Bears go on bombs,detonator and exit
-	Make a seperate struct for bears
 	Add colours
 */
 
@@ -77,7 +75,7 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
-	void paintGame(const char g[][SIZEX], string mess);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -104,7 +102,7 @@ int main()
 
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message);			//display game info, modified grid & messages
+	paintGame(grid, message, bears.size());			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
@@ -115,7 +113,7 @@ int main()
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message);		//display game info, modified grid & messages
+		paintGame(grid, message, bears.size());		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -243,7 +241,8 @@ void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 
 void placeBear(char g[][SIZEX], const Bear bear)
 { //place bear at its new position in grid
-	g[bear.y][bear.x] = bear.symbol;
+	if (bear.visible)
+		g[bear.y][bear.x] = bear.symbol;
 }
 
 void placeBomb(char g[][SIZEX], const Bomb bomb)
@@ -273,46 +272,89 @@ void updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
-	int dx(0), dy(0);
+	int dx(0), dy(0), moved(0), deleteIndex(-1);
 	setKeyDirection(key, dx, dy); 
-	for (auto &bear : bears){
-		//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-		switch (maze[bear.y + dy][bear.x + dx])
-		{			//...depending on what's on the target position in grid...
-		case TUNNEL:		//can move
-			if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
-			{
-				bombs[0].active = false;	//Deactivate the detonator.
-				bombs[0].item.visible = true;
-			}
-			else
-				maze[bear.y][bear.x] = TUNNEL;
+	while (moved < bears.size())
+	{
 
-			bear.y += dy;	//go in that Y direction
-			bear.x += dx;	//go in that X direction
-			bear.moved = true;
-			break;
-		case BEAR:
-			for (auto &bear2 : bears)
-			{
+		for (auto &bear : bears){
+			//check new target position in grid and update game data (incl. bear coordinates) if move is possible
+			switch (maze[bear.y + dy][bear.x + dx])
+			{			//...depending on what's on the target position in grid...
+			case TUNNEL:		//can move
+				if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
+				{
+					bombs[0].active = false;	//Deactivate the detonator.
+					bombs[0].item.visible = true;
+				}
+				else
+					maze[bear.y][bear.x] = TUNNEL;
+				if (!bear.moved)
+				{
+					bear.y += dy;	//go in that Y direction
+					bear.x += dx;	//go in that X direction
+					moved++;
+					bear.moved = true;
+				}
+				break;
+			case BEAR:
+				for (auto &bear2 : bears)
+				{
+					if (bear2.x == bear.x + dx && bear2.y == bear.y + dy)
+					{
+						if (bear2.moved)
+						{
+							bear.moved = true;
+							moved++;
+						}
+					}
+				}
+				break;
+			case WALL:  		//hit a wall and stay there
+				//cout << '\a';	//beep the alarm
+				//mess = "CANNOT GO THERE!";
+				if (!bear.moved)
+				{
+					bear.moved = true;
+					moved++;
+				}
+				break;
+			case DETONATOR:
+				bombs[0].active = true;	//Activate the detonator
+				bombs[0].item.visible = false;
+				bear.y += dy;	//move the bear onto the detonator
+				bear.x += dx;
+				bear.moved = true;
+				moved++;
+				removeBombs(bombs);
+				break;
+			case BOMB:
+				mess = "BOMB!";
+				bear.moved = true;
+				moved++;
+				explodeBombs();
+				break;
+			case EXIT:
+				bear.y += dy;	//go in that Y direction
+				bear.x += dx;	//go in that X direction
+				bear.moved = true;
+				moved++;
+				for (unsigned int i = 0; i < bears.size(); i++)
+				{
+					if (maze[bear.y][bear.x] == EXIT)
+					{
+						deleteIndex = i; // assign index of a bear to be deleted after remaing bears move
+					}
+				}
+				//Add Rescued bar and increment rescued bears
+				break;
 
 			}
-		case WALL:  		//hit a wall and stay there
-			//cout << '\a';	//beep the alarm
-			//mess = "CANNOT GO THERE!";
-			break;
-		case DETONATOR:
-			bombs[0].active = true;	//Activate the detonator
-			bombs[0].item.visible = false;
-			bear.y += dy;	//move the bear onto the detonator
-			bear.x += dx;
-			removeBombs(bombs);
-			break;
-		case BOMB:
-			mess = "BOMB!";
-			explodeBombs();
-			break;
 		}
+	}
+	if (deleteIndex >= 0) //delete bear
+	{
+		bears.erase(bears.begin() + deleteIndex);
 	}
 	for (auto &bear : bears){ // reset moved variable for the next move
 		bear.moved = false;
@@ -397,7 +439,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -406,6 +448,13 @@ void paintGame(const char g[][SIZEX], string mess)
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c: February 2017");
+	//Rescued
+	string bearString = "";
+	for (int i = noOfBears; i < 3; i++)
+	{
+		bearString += "@";
+	}
+	showMessage(clGrey, clYellow, 0, 1, "RESCUED " + bearString);
 
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
