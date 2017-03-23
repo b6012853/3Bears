@@ -48,6 +48,8 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
+const string playerFiles = "//players//";
+
 struct Item {
 	int x, y;
 	char symbol;
@@ -65,6 +67,12 @@ struct Bear {
 	char symbol;
 	bool visible;
 	bool moved;
+};
+
+struct Player{
+	string name;
+	int score;
+	bool cheated;
 };
 
 //---------------------------------------------------------------------------
@@ -438,6 +446,20 @@ bool isArrowKey(const int key)
 bool wantsToQuit(const int key)
 {	//check if the user wants to quit (when key is 'Q' or 'q')
 	return toupper(key) == QUIT;
+}
+
+//---------------------------------------------------------------------------
+//----- File access
+//---------------------------------------------------------------------------
+
+void loadPlayer(Player& player)
+{
+
+}
+
+void savePlayer(Player& player)
+{
+
 }
 
 //---------------------------------------------------------------------------
