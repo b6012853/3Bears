@@ -50,7 +50,7 @@ const int  LEFT(75);		//left arrow
 const char QUIT('Q');		//to end the game
 
 const string playerFileLocation = "players\\";
-const string playerFileType = ".3bears";
+const string playerFileType = ".txt";
 
 struct Item {
 	int x, y;
