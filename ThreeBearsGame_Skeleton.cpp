@@ -369,12 +369,6 @@ void removeBombs(vector<Bomb>& bombs)
 		bombs[b].item.visible = false;
 	}
 }
-
-void explodeBombs()
-{
-	//A bear stepped on a bomb
-
-}
 //---------------------------------------------------------------------------
 //----- process key
 //---------------------------------------------------------------------------
