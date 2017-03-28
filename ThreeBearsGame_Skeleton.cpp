@@ -100,8 +100,14 @@ int main()
 	p.score = 500;
 	p.cheated = false;
 
-	void savePlayer(Player& player);
+	void savePlayer(const Player& player);
 	savePlayer(p);
+
+	Player loadPlayer(const string player);
+	Player r = loadPlayer("Liam");
+
+	cout << r.name << " " << r.score << " " << r.cheated;
+	
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -462,21 +468,24 @@ bool wantsToQuit(const int key)
 //----- File access
 //---------------------------------------------------------------------------
 
-void loadPlayer(Player& player)
+Player loadPlayer(const string player)
 {
-	const string fileName = playerFileLocation + player.name + playerFileType;
-	char end;
+	const string fileName = playerFileLocation + player + playerFileType;
+	Player p;
 	ifstream fin(fileName, ios::in); //Open the file
 	if (fin.fail())	//Check if the open was successful.
 		cout << "Failed to open file: " << fileName;
 	else {
 		//  file open successfully: process the file
-		fin >> player.name >> end >> player.score >> end >> player.cheated;
+		fin >> p.name; fin.get();
+		fin >> p.score;
+		fin >> p.cheated;
 		fin.close();
 	}
+	return p;
 }
 
-void savePlayer(Player& player)
+void savePlayer(const Player& player)
 {
 	const string fileName = playerFileLocation + player.name + playerFileType;
 	ofstream fout(fileName, ios::out);
@@ -484,7 +493,7 @@ void savePlayer(Player& player)
 		cout << "Failed to open file: " << fileName;
 	else {
 		//  file open successfully: process the file
-		fout << player.name << endl << player.score << endl << player.cheated;
+		fout << player.name << "\n" << player.score << "\n" << player.cheated;
 		fout.close();
 	}
 }
