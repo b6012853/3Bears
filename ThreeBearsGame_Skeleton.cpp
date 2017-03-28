@@ -95,20 +95,6 @@ int main()
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintEntryScreen();
 
-	Player p;
-	p.name = "Liam";
-	p.score = 500;
-	p.cheated = false;
-
-	void savePlayer(const Player& player);
-	savePlayer(p);
-
-	Player loadPlayer(const string player);
-	Player r = loadPlayer("Liam");
-
-	cout << r.name << " " << r.score << " " << r.cheated;
-	
-
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
 	char maze[SIZEY][SIZEX];	//structure of the maze
