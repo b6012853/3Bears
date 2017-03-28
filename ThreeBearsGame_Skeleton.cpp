@@ -49,7 +49,8 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
-const string playerFiles = "\\players\\";
+const string playerFileLocation = "players\\";
+const string playerFileType = ".3bears";
 
 struct Item {
 	int x, y;
@@ -463,24 +464,27 @@ bool wantsToQuit(const int key)
 
 void loadPlayer(Player& player)
 {
-	ifstream fin(playerFiles + player.name); //Open the file
+	const string fileName = playerFileLocation + player.name + playerFileType;
+	char end;
+	ifstream fin(fileName, ios::in); //Open the file
 	if (fin.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " + playerFiles + player.name;
+		cout << "Failed to open file: " << fileName;
 	else {
 		//  file open successfully: process the file
-		fin >> player.name >> player.score >> player.cheated;
+		fin >> player.name >> end >> player.score >> end >> player.cheated;
 		fin.close();
 	}
 }
 
 void savePlayer(Player& player)
 {
-	ofstream fout(playerFiles + player.name, ios::out);
+	const string fileName = playerFileLocation + player.name + playerFileType;
+	ofstream fout(fileName, ios::out);
 	if (fout.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " + playerFiles + player.name;
+		cout << "Failed to open file: " << fileName;
 	else {
 		//  file open successfully: process the file
-		fout << player.name << player.score << player.cheated;
+		fout << player.name << endl << player.score << endl << player.cheated;
 		fout.close();
 	}
 }
