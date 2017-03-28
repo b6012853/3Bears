@@ -560,7 +560,24 @@ void paintGrid(const char g[][SIZEX])
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
+		{
+			switch (g[row][col])
+			{
+				case BOMB:
+					SelectTextColour(clRed);
+					break;
+				case BEAR:
+					SelectTextColour(clGreen);
+					break;
+				case DETONATOR:
+					SelectTextColour(clYellow);
+					break;
+				default:
+					SelectTextColour(clWhite);
+					break;
+			}
 			cout << g[row][col];	//output cell content
+		}
 		cout << endl;
 	}
 }
