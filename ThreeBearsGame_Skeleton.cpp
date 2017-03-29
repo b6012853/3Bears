@@ -92,7 +92,7 @@ int main()
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	void paintEntryScreen();
+	string paintEntryScreen();
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -539,21 +539,46 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	// display grid contents
 	paintGrid(g);
 }
-void paintEntryScreen()
+string paintEntryScreen()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	int  getKeyPress();
-	string name = "____________________";
+	int x(10);
+	const int y(5);
+	const int size(20);
+	char name[] = "____________________";
+	string finalName = "";
 	int index(0);
-	showMessage(clBlack, clWhite, 10, 5, name);
-	int key = getKeyPress();
-	while (key != 13 && name.size() <= 20)
+	int key;
+	do
 	{
 		//check if the character is backspace
 		showMessage(clBlack, clWhite, 10, 5, name);
+		Gotoxy(x, y);
 		key = getKeyPress();
+		if (key != 13)
+			name[index] = char(key);
+		if (key != 8)
+		{
+			index++;
+			x++;
+		}
+		else
+		{
+			name[index] = '_';
+			if (x>10)
+				x--;
+			if (index > 0)
+				index--;
+		}
+	} while (key != 13 && x <= size+10);
+	//for 0 to index return new name
+	for (int i = 0; i < index - 1; i++)
+	{
+		finalName = finalName + name[i];
 	}
 	Clrscr();
+	return finalName;
 }
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
