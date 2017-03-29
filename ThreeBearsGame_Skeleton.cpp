@@ -60,7 +60,6 @@ struct Item {
 
 struct Bomb {
 	Item item;
-	int colour;
 	bool active;
 };
 
@@ -205,7 +204,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[0].item.y = row;
 					bombs[0].item.symbol = DETONATOR;
 					bombs[0].item.visible = true;
-					bombs[0].colour = clYellow;
 					bombs[0].active = false;
 					maze[row][col] = TUNNEL;
 					break;
@@ -216,7 +214,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[noOfBombs].item.y = row;
 					bombs[noOfBombs].item.symbol = BOMB;
 					bombs[noOfBombs].item.visible = true;
-					bombs[noOfBombs].colour = clRed;
 					bombs[noOfBombs].active = true;
 					noOfBombs++;
 					maze[row][col] = TUNNEL;
