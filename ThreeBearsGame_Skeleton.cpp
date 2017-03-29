@@ -582,8 +582,6 @@ string paintEntryScreen()
 }
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
-	SelectBackColour(clBlack);
-	SelectTextColour(clWhite);
 	Gotoxy(0, 4);
 	for (int row(0); row < SIZEY; ++row)
 	{
@@ -592,15 +590,23 @@ void paintGrid(const char g[][SIZEX])
 			switch (g[row][col])
 			{
 				case BOMB:
+					SelectBackColour(clBlack);
 					SelectTextColour(clRed);
 					break;
 				case BEAR:
+					SelectBackColour(clBlack);
 					SelectTextColour(clGreen);
 					break;
 				case DETONATOR:
+					SelectBackColour(clBlack);
 					SelectTextColour(clYellow);
 					break;
+				case EXIT:
+					SelectBackColour(clGrey);
+					SelectTextColour(clBlack);
+					break;
 				default:
+					SelectBackColour(clBlack);
 					SelectTextColour(clWhite);
 					break;
 			}
