@@ -545,6 +545,9 @@ void paintEntryScreen()
 	int  getKeyPress();
 	string name = "____________________";
 	int index(0);
+	showMessage(clBlack, clWhite, 10, 1, "  THREE BEARS GAME");
+	showMessage(clBlack, clWhite, 10, 2, "BART, JAMES AND LIAM");
+	showMessage(clBlack, clWhite, 10, 3, "FoP Module - 2016-17");
 	showMessage(clBlack, clWhite, 10, 5, name);
 	int key = getKeyPress();
 	while (key != 13 && name.size() <= 20)
