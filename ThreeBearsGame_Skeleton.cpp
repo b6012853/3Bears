@@ -393,8 +393,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 void removeBombs(vector<Bomb>& bombs)
 {
-	//The detonator was walked on 
-	for (int b=0; b < bombs.size(); b++)
+	//The detonator was walked on
+	const int noOfBombs = bombs.size();
+	for (int b = 0; b < noOfBombs; b++)
 	{
 		bombs[b].active = false;
 		bombs[b].item.visible = false;
@@ -504,8 +505,10 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	void paintGrid(const char g[][SIZEX]);
 
 	//display game title
-	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
-	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c: February 2017");
+	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
+	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER:");
+	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:");
+	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :");
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -514,20 +517,22 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 		bearString += "@";
 		bears++;
 	}
-	showMessage(clGrey, clYellow, 0, 1, "RESCUED " + bearString);
+
+	while (bearString.length() < 8)
+		bearString.append(" ");
+
+	showMessage(clGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
 	//display menu options available
-	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
-	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
-	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
-	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
-	showMessage(clGrey, clWhite, 40, 15, " GAME LEVEL 1 RULES:                ");
-	showMessage(clGrey, clWhite, 40, 16, " Rescue all bears '@' through       ");
-	showMessage(clGrey, clWhite, 40, 17, " exit 'X' avoiding bombs 'O'        ");
-	showMessage(clGrey, clWhite, 40, 18, " To disable bombs use detonator 'T' ");
-	showMessage(clGrey, clWhite, 40, 19, "                                    ");
-	showMessage(clGrey, clWhite, 40, 20, " TO MOVE USE ARROW KEYS             ");
-	showMessage(clGrey, clWhite, 40, 21, " TO QUIT ENTER 'Q'                  ");
+	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
+	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
+	showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
+	showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
+	showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
+	showMessage(clDarkGrey, clWhite, 40, 16, " To disable bombs use detonator 'T' ");
+	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
+	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
@@ -548,12 +553,13 @@ void paintEntryScreen()
 		showMessage(clBlack, clWhite, 10, 5, name);
 		key = getKeyPress();
 	}
+	Clrscr();
 }
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	SelectBackColour(clBlack);
 	SelectTextColour(clWhite);
-	Gotoxy(0, 2);
+	Gotoxy(0, 4);
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
