@@ -543,6 +543,7 @@ void savePlayer(const Player& player)
 	
 	if (fout.fail())	//Check if the open was successful.
 	{
+		void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
 	}
 	else 
