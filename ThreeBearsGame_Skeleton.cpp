@@ -525,17 +525,14 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	void paintGrid(const char g[][SIZEX]);
 
 	//display game title
-<<<<<<< HEAD
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
 	showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
 
 	//display score
-=======
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
 	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER:");
 	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:");
 	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :");
->>>>>>> origin/master
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -550,19 +547,6 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 
 	showMessage(clGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
-<<<<<<< HEAD
-	//display menu options available, No of moves, bears escaped and rules
-	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
-	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
-
-	showMessage(clGrey, clWhite, 40, 15, " GAME LEVEL 1 RULES:                ");
-	showMessage(clGrey, clWhite, 40, 16, " Rescue all bears '@' through       ");
-	showMessage(clGrey, clWhite, 40, 17, " exit 'X' avoiding bombs 'O'        ");
-	showMessage(clGrey, clWhite, 40, 18, " To disable bombs use detonator 'T' ");
-	showMessage(clGrey, clWhite, 40, 19, "                                    ");
-	showMessage(clGrey, clWhite, 40, 20, " TO MOVE USE ARROW KEYS             ");
-	showMessage(clGrey, clWhite, 40, 21, " TO QUIT ENTER 'Q'                  ");
-=======
 	//display menu options available
 	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
@@ -573,7 +557,6 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
 	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
 	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
->>>>>>> origin/master
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
