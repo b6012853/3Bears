@@ -21,6 +21,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 //include our own libraries
@@ -48,6 +49,9 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
+const string playerFileLocation = "players\\";
+const string playerFileType = ".txt";
+
 struct Item {
 	int x, y;
 	char symbol;
@@ -56,7 +60,6 @@ struct Item {
 
 struct Bomb {
 	Item item;
-	int colour;
 	bool active;
 };
 
@@ -65,6 +68,12 @@ struct Bear {
 	char symbol;
 	bool visible;
 	bool moved;
+};
+
+struct Player{
+	string name;
+	int score;
+	bool cheated;
 };
 
 //---------------------------------------------------------------------------
@@ -83,6 +92,7 @@ int main()
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	string paintEntryScreen();
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -102,6 +112,9 @@ int main()
 
 	bool forceQuit = false;
 	int noOfMoves(0);
+
+	//Entry screen
+	paintEntryScreen();
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves);			//display game info, modified grid & messages
@@ -191,7 +204,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[0].item.y = row;
 					bombs[0].item.symbol = DETONATOR;
 					bombs[0].item.visible = true;
-					bombs[0].colour = clYellow;
 					bombs[0].active = false;
 					maze[row][col] = TUNNEL;
 					break;
@@ -202,7 +214,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					bombs[noOfBombs].item.y = row;
 					bombs[noOfBombs].item.symbol = BOMB;
 					bombs[noOfBombs].item.visible = true;
-					bombs[noOfBombs].colour = clRed;
 					bombs[noOfBombs].active = true;
 					noOfBombs++;
 					maze[row][col] = TUNNEL;
@@ -311,6 +322,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 							moved++;
 						}
 					}
+					/*
 					else if (bear2.x == bear.x + (dx * 2) && bear2.y == bear.y + (dy * 2))
 					{
 						bear.y += dy;	//go in that Y direction
@@ -318,6 +330,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 						moved++;
 						bear.moved = true;
 					}
+					*/
 				}
 				break;
 			case WALL:  		//hit a wall and stay there
@@ -341,6 +354,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			case BOMB:
 				forceQuit = true;
 				mess = "You just killed a bear, you sad person!  ";
+				maze[bear.x][bear.y] = TUNNEL;
 				bear.y += dy;	//move the bear onto the detonator
 				bear.x += dx;
 				bear.moved = true;
@@ -382,8 +396,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 void removeBombs(vector<Bomb>& bombs)
 {
-	//The detonator was walked on 
-	for (int b=0; b < bombs.size(); b++)
+	//The detonator was walked on
+	const int noOfBombs = bombs.size();
+	for (int b = 0; b < noOfBombs; b++)
 	{
 		bombs[b].active = false;
 		bombs[b].item.visible = false;
@@ -437,6 +452,40 @@ bool wantsToQuit(const int key)
 }
 
 //---------------------------------------------------------------------------
+//----- File access
+//---------------------------------------------------------------------------
+
+Player loadPlayer(const string player)
+{
+	const string fileName = playerFileLocation + player + playerFileType;
+	Player p;
+	ifstream fin(fileName, ios::in); //Open the file
+	if (fin.fail())	//Check if the open was successful.
+		cout << "Failed to open file: " << fileName;
+	else {
+		//  file open successfully: process the file
+		fin >> p.name; fin.get();
+		fin >> p.score;
+		fin >> p.cheated;
+		fin.close();
+	}
+	return p;
+}
+
+void savePlayer(const Player& player)
+{
+	const string fileName = playerFileLocation + player.name + playerFileType;
+	ofstream fout(fileName, ios::out);
+	if (fout.fail())	//Check if the open was successful.
+		cout << "Failed to open file: " << fileName;
+	else {
+		//  file open successfully: process the file
+		fout << player.name << "\n" << player.score << "\n" << player.cheated;
+		fout.close();
+	}
+}
+
+//---------------------------------------------------------------------------
 //----- display info on screen
 //---------------------------------------------------------------------------
 
@@ -459,10 +508,17 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	void paintGrid(const char g[][SIZEX]);
 
 	//display game title
+<<<<<<< HEAD
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
 	showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
 
 	//display score
+=======
+	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
+	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER:");
+	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:");
+	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :");
+>>>>>>> origin/master
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -471,8 +527,13 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 		bearString += "@";
 		bears++;
 	}
-	showMessage(clGrey, clYellow, 0, 1, "RESCUED " + bearString);
 
+	while (bearString.length() < 8)
+		bearString.append(" ");
+
+	showMessage(clGrey, clYellow, 0, 2, "RESCUED " + bearString);
+
+<<<<<<< HEAD
 	//display menu options available, No of moves, bears escaped and rules
 	showMessage(clBlack, clWhite, 40, 6, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 7, "BEARS ESCAPED:   " + to_string(bears));
@@ -484,22 +545,100 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
 	showMessage(clGrey, clWhite, 40, 19, "                                    ");
 	showMessage(clGrey, clWhite, 40, 20, " TO MOVE USE ARROW KEYS             ");
 	showMessage(clGrey, clWhite, 40, 21, " TO QUIT ENTER 'Q'                  ");
+=======
+	//display menu options available
+	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
+	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
+	showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
+	showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
+	showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
+	showMessage(clDarkGrey, clWhite, 40, 16, " To disable bombs use detonator 'T' ");
+	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
+	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
+>>>>>>> origin/master
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
 	// display grid contents
 	paintGrid(g);
 }
-
+string paintEntryScreen()
+{
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	int  getKeyPress();
+	int x(10);
+	const int y(5);
+	const int size(20);
+	char name[] = "____________________";
+	string finalName = "";
+	int index(0);
+	int key;
+	do
+	{
+		//check if the character is backspace
+		showMessage(clBlack, clWhite, 10, 1, "  THREE BEARS GAME");
+		showMessage(clBlack, clWhite, 10, 2, "BART, JAMES AND LIAM");
+		showMessage(clBlack, clWhite, 10, 3, "FoP Module - 2016-17");
+		showMessage(clBlack, clWhite, 10, 5, name);
+		Gotoxy(x, y);
+		key = getKeyPress();
+		if (key != 13)
+			name[index] = char(key);
+		if (key != 8)
+		{
+			index++;
+			x++;
+		}
+		else
+		{
+			name[index] = '_';
+			if (x>10)
+				x--;
+			if (index > 0)
+				index--;
+		}
+	} while (key != 13 && x <= size+10);
+	//for 0 to index return new name
+	for (int i = 0; i < index - 1; i++)
+	{
+		finalName = finalName + name[i];
+	}
+	Clrscr();
+	return finalName;
+}
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
-	SelectBackColour(clBlack);
-	SelectTextColour(clWhite);
-	Gotoxy(0, 2);
+	Gotoxy(0, 4);
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
+		{
+			switch (g[row][col])
+			{
+				case BOMB:
+					SelectBackColour(clBlack);
+					SelectTextColour(clRed);
+					break;
+				case BEAR:
+					SelectBackColour(clBlack);
+					SelectTextColour(clGreen);
+					break;
+				case DETONATOR:
+					SelectBackColour(clBlack);
+					SelectTextColour(clYellow);
+					break;
+				case EXIT:
+					SelectBackColour(clGrey);
+					SelectTextColour(clBlack);
+					break;
+				default:
+					SelectBackColour(clBlack);
+					SelectTextColour(clWhite);
+					break;
+			}
 			cout << g[row][col];	//output cell content
+		}
 		cout << endl;
 	}
 }
