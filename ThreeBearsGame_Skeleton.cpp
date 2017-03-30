@@ -4,11 +4,6 @@
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
 
-/* TODO
-Let Bears go on bombs,detonator and exit
-Add colours
-*/
-
 //---------------------------------------------------------------------------
 //----- include libraries
 //---------------------------------------------------------------------------
@@ -72,7 +67,7 @@ struct Bear {
 
 struct Player{
 	string name;
-	int score = 0;
+	int score;
 	bool cheated;
 };
 
@@ -84,7 +79,7 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, const Player& player);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -93,7 +88,9 @@ int main()
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	string paintEntryScreen();
-	Player loadPlayer(const string player);
+	Player player;
+	Player loadPlayer(const string playerName);
+	void savePlayer(const Player& player);
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -103,7 +100,6 @@ int main()
 	bears.push_back(Bear());
 	bears.push_back(Bear());
 	bears.push_back(Bear());
-	Player player;
 
 	vector<Bomb> bombs;
 	for (int i = 0; i < 6; i++)
@@ -125,12 +121,16 @@ int main()
 		if (isArrowKey(key))
 		{
 			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
+			if (bears.empty())
+			{
+				savePlayer(player);
+			}
 			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
 		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
-		if (!forceQuit) key = getKeyPress(); 			//display menu & read in next option
+		if( !forceQuit ) key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
 	return 0;
@@ -156,30 +156,30 @@ void setInitialMazeStructure(char maze[][SIZEX])
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
-		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-		{ 1, 2, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
-		{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 },
-		{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1 },
-		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		    { 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1},
+			{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+			{ 1, 2, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+			{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+			{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 	// with 1 for wall, 0 for tunnel, etc. 
 	//copy into maze structure
-	for (int row(0); row < SIZEY; ++row)
+	for (int row(0); row < SIZEY; ++row)	
 		for (int col(0); col < SIZEX; ++col)
 			switch (initialMaze[row][col])
-		{
-			case 0: maze[row][col] = TUNNEL; break;
-			case 1: maze[row][col] = WALL; break;
-			case 2: maze[row][col] = BEAR; break;
-			case 3: maze[row][col] = BOMB; break;
-			case 4: maze[row][col] = DETONATOR; break;
-			case 5: maze[row][col] = EXIT; break;
-		}
+			{
+				case 0: maze[row][col] = TUNNEL; break;
+				case 1: maze[row][col] = WALL; break;
+				case 2: maze[row][col] = BEAR; break;
+				case 3: maze[row][col] = BOMB; break;
+				case 4: maze[row][col] = DETONATOR; break;
+				case 5: maze[row][col] = EXIT; break;
+			}
 }
 void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs)
 { //extract bear's coordinates from initial maze info
@@ -188,40 +188,39 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (maze[row][col])
-		{
-			case BEAR:
 			{
-				bears[noOfBears].x = col;
-				bears[noOfBears].y = row;
-				bears[noOfBears].symbol = BEAR;
-				bears[noOfBears].visible = true;
-				noOfBears++;
-				maze[row][col] = TUNNEL;
-				break;
+				case BEAR:
+				{
+					bears[noOfBears].x = col;
+					bears[noOfBears].y = row;
+					bears[noOfBears].symbol = BEAR;
+					bears[noOfBears].visible = true;
+					noOfBears++;
+					maze[row][col] = TUNNEL;
+					break;
+				}
+				case DETONATOR:
+				{		
+					bombs[0].item.x = col;
+					bombs[0].item.y = row;
+					bombs[0].item.symbol = DETONATOR;
+					bombs[0].item.visible = true;
+					bombs[0].active = false;
+					maze[row][col] = TUNNEL;
+					break;
+				}
+				case BOMB:
+				{
+					bombs[noOfBombs].item.x = col;
+					bombs[noOfBombs].item.y = row;
+					bombs[noOfBombs].item.symbol = BOMB;
+					bombs[noOfBombs].item.visible = true;
+					bombs[noOfBombs].active = true;
+					noOfBombs++;
+					maze[row][col] = TUNNEL;
+					break;
+				}
 			}
-			case DETONATOR:
-			{
-				bombs[0].item.x = col;
-				bombs[0].item.y = row;
-				bombs[0].item.symbol = DETONATOR;
-				bombs[0].item.visible = true;
-				bombs[0].active = false;
-				maze[row][col] = TUNNEL;
-				break;
-			}
-			case BOMB:
-			{
-				bombs[noOfBombs].item.x = col;
-				bombs[noOfBombs].item.y = row;
-				bombs[noOfBombs].item.symbol = BOMB;
-				bombs[noOfBombs].item.visible = true;
-				bombs[noOfBombs].active = true;
-				noOfBombs++;
-				maze[row][col] = TUNNEL;
-				break;
-			}
-			//will work for other items too
-		}
 }
 
 //---------------------------------------------------------------------------
@@ -248,8 +247,8 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear>
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 { //reset the empty/fixed maze configuration into grid
-	for (int row(0); row < SIZEY; ++row)
-		for (int col(0); col < SIZEX; ++col)
+	for (int row(0); row < SIZEY; ++row)	
+		for (int col(0); col < SIZEX; ++col)	
 			grid[row][col] = maze[row][col];
 }
 
@@ -277,7 +276,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	void endProgram();
 	bool forceQuit = false;
 	assert(isArrowKey(key));
-
+	
 	char maze[SIZEY][SIZEX];
 	setMaze(maze, g);
 
@@ -286,7 +285,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 	//calculate direction of movement for given key
 	int dx(0), dy(0), moved(0), deleteIndex(-1);
-	setKeyDirection(key, dx, dy);
+	setKeyDirection(key, dx, dy); 
 	while (moved < bears.size())
 	{
 
@@ -301,7 +300,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 					bombs[0].item.visible = true;
 				}
 				else
-					maze[bear.y][bear.x] = TUNNEL;
+					if (!bear.moved)
+						maze[bear.y][bear.x] = TUNNEL;
 				if (!bear.moved)
 				{
 					bear.y += dy;	//go in that Y direction
@@ -320,13 +320,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 							bear.moved = true;
 							moved++;
 						}
-					}
-					else if (bear2.x == bear.x + (dx * 2) && bear2.y == bear.y + (dy * 2))
-					{
-						bear.y += dy;	//go in that Y direction
-						bear.x += dx;	//go in that X direction
-						moved++;
-						bear.moved = true;
 					}
 				}
 				break;
@@ -349,8 +342,10 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			case BOMB:
 				forceQuit = true;
 				mess = "You just killed a bear, you sad person!  ";
+				maze[bear.y][bear.x] = TUNNEL;
 				bear.y += dy;	//move the bear onto the detonator
 				bear.x += dx;
+				maze[bear.y][bear.x] = BEAR;
 				bear.moved = true;
 				moved++;
 				break;
@@ -448,17 +443,22 @@ bool wantsToQuit(const int key)
 //----- File access
 //---------------------------------------------------------------------------
 
-Player loadPlayer(const string player)
+Player loadPlayer(const string playerName)
 {
-	const string fileName = playerFileLocation + player + playerFileType;
+	const string fileName = playerFileLocation + playerName + playerFileType;
 	Player p;
 	ifstream fin(fileName, ios::in); //Open the file
 	if (fin.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " << fileName;
-	else {
+	{
+		p.name = playerName;
+		p.score = 500;
+		p.cheated = false;
+	}
+	else 
+	{
 		//  file open successfully: process the file
 		fin >> p.name; fin.get();
-		fin >> p.score;
+		fin >> p.score; fin.get();
 		fin >> p.cheated;
 		fin.close();
 	}
@@ -467,11 +467,15 @@ Player loadPlayer(const string player)
 
 void savePlayer(const Player& player)
 {
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	const string fileName = playerFileLocation + player.name + playerFileType;
 	ofstream fout(fileName, ios::out);
 	if (fout.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " << fileName;
-	else {
+	{
+		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
+	}
+	else 
+	{
 		//  file open successfully: process the file
 		fout << player.name << "\n" << player.score << "\n" << player.cheated;
 		fout.close();
@@ -483,9 +487,9 @@ void savePlayer(const Player& player)
 //---------------------------------------------------------------------------
 
 string tostring(char x) {
-	std::ostringstream os;
-	os << x;
-	return os.str();
+    std::ostringstream os;
+    os << x;
+    return os.str();
 }
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message)
 {
@@ -494,18 +498,21 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, const Player& player)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintGrid(const char g[][SIZEX]);
-	string calcTime();
 
 	//display game title
+	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
+	showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
+
+	//display score
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
-	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER: " + player.name);
-	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:" + player.score);
-	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :" + calcTime());
+	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER:");
+	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:");
+	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :");
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -532,7 +539,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
-
+	
 	// display grid contents
 	paintGrid(g);
 }
@@ -571,7 +578,7 @@ string paintEntryScreen()
 			if (index > 0)
 				index--;
 		}
-	} while (key != 13 && x <= size + 10);
+	} while (key != 13 && x <= size+10);
 	//for 0 to index return new name
 	for (int i = 0; i < index - 1; i++)
 	{
@@ -589,37 +596,31 @@ void paintGrid(const char g[][SIZEX])
 		{
 			switch (g[row][col])
 			{
-			case BOMB:
-				SelectBackColour(clBlack);
-				SelectTextColour(clRed);
-				break;
-			case BEAR:
-				SelectBackColour(clBlack);
-				SelectTextColour(clGreen);
-				break;
-			case DETONATOR:
-				SelectBackColour(clBlack);
-				SelectTextColour(clYellow);
-				break;
-			case EXIT:
-				SelectBackColour(clGrey);
-				SelectTextColour(clBlack);
-				break;
-			default:
-				SelectBackColour(clBlack);
-				SelectTextColour(clWhite);
-				break;
+				case BOMB:
+					SelectBackColour(clBlack);
+					SelectTextColour(clRed);
+					break;
+				case BEAR:
+					SelectBackColour(clBlack);
+					SelectTextColour(clGreen);
+					break;
+				case DETONATOR:
+					SelectBackColour(clBlack);
+					SelectTextColour(clYellow);
+					break;
+				case EXIT:
+					SelectBackColour(clGrey);
+					SelectTextColour(clBlack);
+					break;
+				default:
+					SelectBackColour(clBlack);
+					SelectTextColour(clWhite);
+					break;
 			}
 			cout << g[row][col];	//output cell content
 		}
 		cout << endl;
 	}
-}
-string calcTime()
-{
-	time_t now = time(0);
-	char* dt = ctime(&now);
-	return dt;
 }
 
 void endProgram()
