@@ -503,16 +503,17 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintGrid(const char g[][SIZEX]);
+	string calcTime();
 
 	//display game title
-	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
-	showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
+	//showMessage(clBlack, clYellow, 0, 0, "___GAME___");
+	//showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
 
 	//display score
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
-	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER:");
-	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE:");
-	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME :");
+	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER: " + player.name);
+	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE: " + to_string(player.score));
+	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME: " + calcTime());
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -559,7 +560,7 @@ string paintEntryScreen()
 		//check if the character is backspace
 		showMessage(clBlack, clWhite, 10, 1, "  THREE BEARS GAME");
 		showMessage(clBlack, clWhite, 10, 2, "BART, JAMES AND LIAM");
-		showMessage(clBlack, clWhite, 10, 3, "FoP Module - 2016-17");
+		//showMessage(clBlack, clWhite, 10, 3, "FoP Module - 2016-17");
 		showMessage(clBlack, clWhite, 10, 5, name);
 		Gotoxy(x, y);
 		key = getKeyPress();
@@ -621,6 +622,12 @@ void paintGrid(const char g[][SIZEX])
 		}
 		cout << endl;
 	}
+}
+string calcTime()
+{
+	time_t now = time(0);
+	char* dt = ctime(&now);
+	return dt;
 }
 
 void endProgram()
