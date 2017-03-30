@@ -302,7 +302,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 					bombs[0].item.visible = true;
 				}
 				else
-					maze[bear.y][bear.x] = TUNNEL;
+					if (!bear.moved)
+						maze[bear.y][bear.x] = TUNNEL;
 				if (!bear.moved)
 				{
 					bear.y += dy;	//go in that Y direction
@@ -354,9 +355,10 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			case BOMB:
 				forceQuit = true;
 				mess = "You just killed a bear, you sad person!  ";
-				maze[bear.x][bear.y] = TUNNEL;
+				maze[bear.y][bear.x] = TUNNEL;
 				bear.y += dy;	//move the bear onto the detonator
 				bear.x += dx;
+				maze[bear.y][bear.x] = BEAR;
 				bear.moved = true;
 				moved++;
 				break;
