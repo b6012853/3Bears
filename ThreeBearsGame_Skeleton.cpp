@@ -4,14 +4,11 @@
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
 
-<<<<<<< HEAD
 /* TODO
 Let Bears go on bombs,detonator and exit
 Add colours
 */
 
-=======
->>>>>>> origin/master
 //---------------------------------------------------------------------------
 //----- include libraries
 //---------------------------------------------------------------------------
@@ -194,7 +191,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 		{
 			case BEAR:
 			{
-<<<<<<< HEAD
 				bears[noOfBears].x = col;
 				bears[noOfBears].y = row;
 				bears[noOfBears].symbol = BEAR;
@@ -223,39 +219,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 				noOfBombs++;
 				maze[row][col] = TUNNEL;
 				break;
-=======
-				case BEAR:
-				{
-					bears[noOfBears].x = col;
-					bears[noOfBears].y = row;
-					bears[noOfBears].symbol = BEAR;
-					bears[noOfBears].visible = true;
-					noOfBears++;
-					maze[row][col] = TUNNEL;
-					break;
-				}
-				case DETONATOR:
-				{		
-					bombs[0].item.x = col;
-					bombs[0].item.y = row;
-					bombs[0].item.symbol = DETONATOR;
-					bombs[0].item.visible = true;
-					bombs[0].active = false;
-					maze[row][col] = TUNNEL;
-					break;
-				}
-				case BOMB:
-				{
-					bombs[noOfBombs].item.x = col;
-					bombs[noOfBombs].item.y = row;
-					bombs[noOfBombs].item.symbol = BOMB;
-					bombs[noOfBombs].item.visible = true;
-					bombs[noOfBombs].active = true;
-					noOfBombs++;
-					maze[row][col] = TUNNEL;
-					break;
-				}
->>>>>>> origin/master
 			}
 			//will work for other items too
 		}
@@ -358,7 +321,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 							moved++;
 						}
 					}
-<<<<<<< HEAD
 					else if (bear2.x == bear.x + (dx * 2) && bear2.y == bear.y + (dy * 2))
 					{
 						bear.y += dy;	//go in that Y direction
@@ -366,8 +328,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 						moved++;
 						bear.moved = true;
 					}
-=======
->>>>>>> origin/master
 				}
 				break;
 			case WALL:  		//hit a wall and stay there
