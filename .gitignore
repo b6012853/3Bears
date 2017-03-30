@@ -12,3 +12,9 @@ Debug/FoP_ThreeBearsGame_Project.log
 *.sdf
 FoP_ThreeBearsGame_Project.sdf
 *.sdf
+*.obj
+Debug/ConsoleUtils.obj
+*.tlog
+Debug/ConsoleUtils.obj
+*.obj
+*.tlog
