@@ -549,3 +549,4 @@ void endProgram()
 	showMessage(clRed, clYellow, 40, 10, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
+//help me
