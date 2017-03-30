@@ -48,7 +48,7 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
-const string playerFiles = "//players//";
+const string playerFiles = "players//";
 
 struct Item {
 	int x, y;
