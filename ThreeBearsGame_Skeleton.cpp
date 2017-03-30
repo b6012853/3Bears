@@ -84,7 +84,7 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -93,6 +93,9 @@ int main()
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	string paintEntryScreen();
+	Player player;
+	Player loadPlayer(const string playerName);
+	void savePlayer(const Player& player);
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
@@ -114,21 +117,25 @@ int main()
 	int noOfMoves(0);
 
 	//Entry screen
-	paintEntryScreen();
+	player = loadPlayer(paintEntryScreen());
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, bears.size(), noOfMoves);			//display game info, modified grid & messages
+	paintGame(grid, message, bears.size(), noOfMoves, player);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key) && !forceQuit)			//while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
 			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
+			if (bears.empty())
+			{
+				savePlayer(player);
+			}
 			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message, bears.size(), noOfMoves);		//display game info, modified grid & messages
+		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
 		if( !forceQuit ) key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -455,17 +462,22 @@ bool wantsToQuit(const int key)
 //----- File access
 //---------------------------------------------------------------------------
 
-Player loadPlayer(const string player)
+Player loadPlayer(const string playerName)
 {
-	const string fileName = playerFileLocation + player + playerFileType;
+	const string fileName = playerFileLocation + playerName + playerFileType;
 	Player p;
 	ifstream fin(fileName, ios::in); //Open the file
 	if (fin.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " << fileName;
-	else {
+	{
+		p.name = playerName;
+		p.score = 500;
+		p.cheated = false;
+	}
+	else 
+	{
 		//  file open successfully: process the file
 		fin >> p.name; fin.get();
-		fin >> p.score;
+		fin >> p.score; fin.get();
 		fin >> p.cheated;
 		fin.close();
 	}
@@ -476,9 +488,14 @@ void savePlayer(const Player& player)
 {
 	const string fileName = playerFileLocation + player.name + playerFileType;
 	ofstream fout(fileName, ios::out);
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	showMessage(clRed, clYellow, 0, 20, "player.name: " + player.name);
 	if (fout.fail())	//Check if the open was successful.
-		cout << "Failed to open file: " << fileName;
-	else {
+	{
+		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
+	}
+	else 
+	{
 		//  file open successfully: process the file
 		fout << player.name << "\n" << player.score << "\n" << player.cheated;
 		fout.close();
@@ -501,7 +518,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
