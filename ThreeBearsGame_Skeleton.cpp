@@ -4,11 +4,6 @@
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
 
-/* TODO
-	Let Bears go on bombs,detonator and exit
-	Add colours
-*/
-
 //---------------------------------------------------------------------------
 //----- include libraries
 //---------------------------------------------------------------------------
@@ -100,7 +95,6 @@ int main()
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
 	char maze[SIZEY][SIZEX];	//structure of the maze
-	//Item bear = {0, 0, BEAR, true}; 			//bear's position and symbol
 	string message("LET'S START...");	//current message to player
 	vector<Bear> bears;
 	bears.push_back(Bear());
@@ -226,7 +220,6 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 					maze[row][col] = TUNNEL;
 					break;
 				}
-				//will work for other items too
 			}
 }
 
@@ -288,8 +281,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	setMaze(maze, g);
 
 	void removeBombs(vector<Bomb>& bombs);
-
-	//reset message to blank
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
@@ -330,20 +321,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 							moved++;
 						}
 					}
-					/*
-					else if (bear2.x == bear.x + (dx * 2) && bear2.y == bear.y + (dy * 2))
-					{
-						bear.y += dy;	//go in that Y direction
-						bear.x += dx;	//go in that X direction
-						moved++;
-						bear.moved = true;
-					}
-					*/
 				}
 				break;
 			case WALL:  		//hit a wall and stay there
-				//cout << '\a';	//beep the alarm
-				//mess = "CANNOT GO THERE!";
 				if (!bear.moved)
 				{
 					bear.moved = true;
@@ -381,7 +361,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 						deleteIndex = i; // assign index of a bear to be deleted after remaing bears move
 					}
 				}
-				//Add Rescued bar and increment rescued bears
 				break;
 
 			}
@@ -490,8 +469,6 @@ void savePlayer(const Player& player)
 {
 	const string fileName = playerFileLocation + player.name + playerFileType;
 	ofstream fout(fileName, ios::out);
-	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	showMessage(clRed, clYellow, 0, 20, "player.name: " + player.name);
 	if (fout.fail())	//Check if the open was successful.
 	{
 		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
