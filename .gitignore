@@ -1,0 +1,14 @@
+*.obj
+Debug/FoP_Thre.2C5BFA06.tlog/cl.command.1.tlog
+*.tlog
+Debug/FoP_ThreeBearsGame_Project.exe
+*.ilk
+*.opensdf
+Debug/vc120.pdb
+*.idb
+Debug/FoP_ThreeBearsGame_Project.pdb
+*.sdf
+Debug/FoP_ThreeBearsGame_Project.log
+*.sdf
+FoP_ThreeBearsGame_Project.sdf
+*.sdf
