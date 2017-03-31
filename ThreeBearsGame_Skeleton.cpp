@@ -561,7 +561,7 @@ string paintEntryScreen()
 		//check if the character is backspace
 		showMessage(clDarkGrey, clYellow, 10, 5, "        THREE BEARS GAME        ");
 		showMessage(clDarkGrey, clYellow, 10, 6, "      Bart, James and Liam      ");
-		showMessage(clDarkGrey, clYellow, 10, 7, "      FoP Module - 2016-17      ");
+		showMessage(clDarkGrey, clYellow, 10, 7, "  BSc Computer Science 2016-17  ");
 		showMessage(clBlack, clWhite, 10, 10, "Enter name: ");
 		showMessage(clBlack, clWhite, 22, 10, name);
 		Gotoxy(x, y);
