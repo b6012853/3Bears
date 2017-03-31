@@ -17,6 +17,7 @@
 #include <sstream>
 #include <vector>
 #include <fstream>
+#include <direct.h>
 using namespace std;
 
 //include our own libraries
@@ -68,7 +69,6 @@ struct Bear {
 struct Player{
 	string name;
 	int score;
-	bool cheated;
 };
 
 //---------------------------------------------------------------------------
@@ -123,6 +123,8 @@ int main()
 			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
 			if (bears.empty())
 			{
+				if (player.score > noOfMoves)
+					player.score = noOfMoves;
 				savePlayer(player);
 			}
 			updateGrid(grid, maze, bears, bombs);			//update grid information
@@ -452,14 +454,12 @@ Player loadPlayer(const string playerName)
 	{
 		p.name = playerName;
 		p.score = 500;
-		p.cheated = false;
 	}
 	else 
 	{
 		//  file open successfully: process the file
 		fin >> p.name; fin.get();
-		fin >> p.score; fin.get();
-		fin >> p.cheated;
+		fin >> p.score;
 		fin.close();
 	}
 	return p;
@@ -470,6 +470,7 @@ void savePlayer(const Player& player)
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	const string fileName = playerFileLocation + player.name + playerFileType;
 	ofstream fout(fileName, ios::out);
+	
 	if (fout.fail())	//Check if the open was successful.
 	{
 		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
@@ -477,7 +478,7 @@ void savePlayer(const Player& player)
 	else 
 	{
 		//  file open successfully: process the file
-		fout << player.name << "\n" << player.score << "\n" << player.cheated;
+		fout << player.name << "\n" << player.score;
 		fout.close();
 	}
 }
@@ -526,7 +527,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	while (bearString.length() < 8)
 		bearString.append(" ");
 
-	showMessage(clGrey, clYellow, 0, 2, "RESCUED " + bearString);
+	showMessage(clDarkGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
 	//display menu options available
 	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
@@ -548,8 +549,8 @@ string paintEntryScreen()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	int  getKeyPress();
-	int x(10);
-	const int y(5);
+	int x(22);
+	const int y(10);
 	const int size(20);
 	char name[] = "____________________";
 	string finalName = "";
@@ -558,10 +559,11 @@ string paintEntryScreen()
 	do
 	{
 		//check if the character is backspace
-		showMessage(clBlack, clWhite, 10, 1, "  THREE BEARS GAME");
-		showMessage(clBlack, clWhite, 10, 2, "BART, JAMES AND LIAM");
-		//showMessage(clBlack, clWhite, 10, 3, "FoP Module - 2016-17");
-		showMessage(clBlack, clWhite, 10, 5, name);
+		showMessage(clDarkGrey, clYellow, 10, 5, "        THREE BEARS GAME        ");
+		showMessage(clDarkGrey, clYellow, 10, 6, "      Bart, James and Liam      ");
+		showMessage(clDarkGrey, clYellow, 10, 7, "      FoP Module - 2016-17      ");
+		showMessage(clBlack, clWhite, 10, 10, "Enter name: ");
+		showMessage(clBlack, clWhite, 22, 10, name);
 		Gotoxy(x, y);
 		key = getKeyPress();
 		if (key != 13)
@@ -574,12 +576,12 @@ string paintEntryScreen()
 		else
 		{
 			name[index] = '_';
-			if (x>10)
+			if (x>22)
 				x--;
 			if (index > 0)
 				index--;
 		}
-	} while (key != 13 && x <= size+10);
+	} while (key != 13 && x <= size+22);
 	//for 0 to index return new name
 	for (int i = 0; i < index - 1; i++)
 	{
