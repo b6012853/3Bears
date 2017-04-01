@@ -505,6 +505,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintGrid(const char g[][SIZEX]);
 	string calcTime();
+	string makeLength(string s, int length);
 
 	//display game title
 	//showMessage(clBlack, clYellow, 0, 0, "___GAME___");
@@ -512,9 +513,9 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 
 	//display score
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
-	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER: " + player.name);
-	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE: " + to_string(player.score));
-	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME: " + calcTime());
+	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER: " + makeLength(player.name, 21));
+	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 21));
+	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME : " + calcTime());
 	//Rescued
 	string bearString = "";
 	int bears(0);
@@ -524,8 +525,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 		bears++;
 	}
 
-	while (bearString.length() < 8)
-		bearString.append(" ");
+	bearString = makeLength(bearString, 8);
 
 	showMessage(clDarkGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
@@ -625,11 +625,19 @@ void paintGrid(const char g[][SIZEX])
 		cout << endl;
 	}
 }
+
 string calcTime()
 {
 	time_t now = time(0);
 	char* dt = ctime(&now);
 	return dt;
+}
+
+string makeLength(string s, int length)
+{
+	while (s.length() < length)
+		s.append(" ");
+	return s;
 }
 
 void endProgram()
