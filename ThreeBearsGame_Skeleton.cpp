@@ -111,7 +111,9 @@ int main()
 	int noOfMoves(0);
 
 	//Entry screen
-	player = loadPlayer(paintEntryScreen());
+	if (_mkdir(playerFileLocation.c_str()) == 0) //If the players folder doesn't exist create it.
+		cout << "Created new player save folder: " << playerFileLocation;
+	player = loadPlayer(paintEntryScreen()); //Load the details of the player (if any) from file.
 	//action...
 	initialiseGame(grid, maze, bears, bombs);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves, player);			//display game info, modified grid & messages
@@ -123,9 +125,11 @@ int main()
 			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
 			if (bears.empty())
 			{
-				if (player.score > noOfMoves)
-					player.score = noOfMoves;
-				savePlayer(player);
+				if (player.score > noOfMoves) //If the new score is lower
+				{
+					player.score = noOfMoves; //Change their player record
+					savePlayer(player);			  //And update their file.
+				}
 			}
 			updateGrid(grid, maze, bears, bombs);			//update grid information
 		}
