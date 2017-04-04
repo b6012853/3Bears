@@ -69,6 +69,8 @@ struct Bear {
 struct Player{
 	string name;
 	int score;
+	bool cheated = false;
+	bool cheating = false;
 };
 
 //---------------------------------------------------------------------------
@@ -82,8 +84,9 @@ int main()
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
+	bool isCheatKey(const char key);
 	int  getKeyPress();
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -100,8 +103,10 @@ int main()
 	bears.push_back(Bear());
 	bears.push_back(Bear());
 	bears.push_back(Bear());
+	
 
 	vector<Bomb> bombs;
+	const int noOfBombs = bombs.size();
 	for (int i = 0; i < 6; i++)
 	{
 		bombs.push_back(Bomb()); //Item 0 detenator, 1+ are bombs
@@ -120,21 +125,32 @@ int main()
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key) && !forceQuit)			//while user does not want to quit
 	{
-		if (isArrowKey(key))
+		if (isCheatKey(key))
 		{
-			forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves);		//move bear in that direction
-			if (bears.empty())
-			{
-				if (player.score > noOfMoves) //If the new score is lower
-				{
-					player.score = noOfMoves; //Change their player record
-					savePlayer(player);			  //And update their file.
-				}
-			}
-			updateGrid(grid, maze, bears, bombs);			//update grid information
+			player.cheated = true;
+			player.cheating = !player.cheating;
+			noOfMoves = 500;
+			cout << "\a";
+			cout << "\a";
+			cout << "\a";
 		}
-		else
-			message = "INVALID KEY!";	//set 'Invalid key' message
+		else {
+			if (isArrowKey(key))
+			{
+				forceQuit = updateGameData(grid, bears, bombs, key, message, noOfMoves, player);		//move bear in that direction
+				if (bears.empty())
+				{
+					if (player.score > noOfMoves && !player.cheated) //If the new score is lower and they haven't cheated
+					{
+						player.score = noOfMoves; //Change their player record
+						savePlayer(player);			  //And update their file.
+					}
+				}
+				updateGrid(grid, maze, bears, bombs);			//update grid information
+			}
+			else
+				message = "INVALID KEY!";	//set 'Invalid key' message
+		}
 		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
 		if( !forceQuit ) key = getKeyPress(); 			//display menu & read in next option
 	}
@@ -273,7 +289,7 @@ void placeBomb(char g[][SIZEX], const Bomb bomb)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -288,6 +304,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 
 	void removeBombs(vector<Bomb>& bombs);
 	mess = "                                         ";		//reset message to blank
+	const int noOfBombs = bombs.size();
 
 	//calculate direction of movement for given key
 	int dx(0), dy(0), moved(0), deleteIndex(-1);
@@ -300,14 +317,31 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			switch (maze[bear.y + dy][bear.x + dx])
 			{			//...depending on what's on the target position in grid...
 			case TUNNEL:		//can move
-				if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
+				if (!player.cheating)
 				{
-					bombs[0].active = false;	//Deactivate the detonator.
-					bombs[0].item.visible = true;
+					if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
+					{
+						bombs[0].active = false;	//Deactivate the detonator.
+						bombs[0].item.visible = true;
+					}
+					else
+						if (!bear.moved)
+							maze[bear.y][bear.x] = TUNNEL;
 				}
 				else
-					if (!bear.moved)
-						maze[bear.y][bear.x] = TUNNEL;
+				{
+					for (int b = 0; b < noOfBombs; b++)
+					{
+						if (bear.y == bombs[b].item.y && bear.x == bombs[b].item.x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
+						{
+							bombs[b].active = false;
+							bombs[b].item.visible = true;
+						}
+						else
+							if (!bear.moved)
+								maze[bear.y][bear.x] = TUNNEL;
+					}
+				}
 				if (!bear.moved)
 				{
 					bear.y += dy;	//go in that Y direction
@@ -334,6 +368,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				{
 					bear.moved = true;
 					moved++;
+					cout << "\a";
 				}
 				break;
 			case DETONATOR:
@@ -343,17 +378,43 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				bear.x += dx;
 				bear.moved = true;
 				moved++;
-				removeBombs(bombs);
+				if (!player.cheating)
+				{
+					removeBombs(bombs);
+				}
 				break;
 			case BOMB:
-				forceQuit = true;
-				mess = "You just killed a bear, you sad person!  ";
-				maze[bear.y][bear.x] = TUNNEL;
-				bear.y += dy;	//move the bear onto the detonator
-				bear.x += dx;
-				maze[bear.y][bear.x] = BEAR;
-				bear.moved = true;
-				moved++;
+				if (!player.cheating)
+				{
+					forceQuit = true;
+					mess = "You just killed a bear, you sad person!  ";
+					maze[bear.y][bear.x] = TUNNEL;
+					bear.y += dy;	//move the bear onto the detonator
+					bear.x += dx;
+					maze[bear.y][bear.x] = BEAR;
+					bear.moved = true;
+					moved++;
+				}
+				else
+				{
+					if (!bear.moved)
+					{
+						bear.y += dy;	//go in that Y direction
+						bear.x += dx;	//go in that X direction
+						moved++;
+						bear.moved = true;
+					}
+					for (int b = 0; b < noOfBombs; b++)
+					{
+						if (bear.y == bombs[b].item.y && bear.x == bombs[b].item.x)
+						{
+							bombs[b].item.visible = false;
+						}
+						else
+							if (!bear.moved)
+								maze[bear.y][bear.x] = TUNNEL;
+					}
+				}
 				break;
 			case EXIT:
 				bear.y += dy;	//go in that Y direction
@@ -384,7 +445,10 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 		forceQuit = true;
 		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
 	}
-	numberOfMoves++;
+	if (!player.cheated)
+	{
+		numberOfMoves++;
+	}
 	return forceQuit;
 }
 
@@ -439,6 +503,10 @@ int getKeyPress()
 bool isArrowKey(const int key)
 {	//check if the key pressed is an arrow key (also accept 'K', 'M', 'H' and 'P')
 	return (key == LEFT) || (key == RIGHT) || (key == UP) || (key == DOWN);
+}
+bool isCheatKey(const char key)
+{	//Check if the user has entered the cheat key (C)
+	return (key == 'C');
 }
 bool wantsToQuit(const int key)
 {	//check if the user wants to quit (when key is 'Q' or 'q')
@@ -517,9 +585,17 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 
 	//display score
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
-	showMessage(clDarkGrey, clYellow, 40, 0, " CURRENT PLAYER: " + makeLength(player.name, 21));
-	showMessage(clDarkGrey, clYellow, 40, 1, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 21));
-	showMessage(clDarkGrey, clYellow, 40, 2, " DATE AND TIME : " + calcTime());
+	showMessage(clDarkGrey, clYellow, 39, 0, " CURRENT PLAYER: " + makeLength(player.name, 24));
+	showMessage(clDarkGrey, clYellow, 39, 1, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 24));
+	showMessage(clDarkGrey, clYellow, 39, 2, " DATE AND TIME : " + calcTime());
+	if (player.cheating)
+	{
+		showMessage(clBlack, clWhite, 39, 3, " CHEAT MODE ACTIVATED ");
+	}
+	else
+	{
+		showMessage(clBlack, clWhite, 39, 3, "                           ");
+	}
 	//Rescued
 	string bearString = "";
 	int bears(0);
