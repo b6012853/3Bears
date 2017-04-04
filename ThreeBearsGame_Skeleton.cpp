@@ -533,6 +533,12 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 
 	showMessage(clDarkGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 5, makeLength("BEAR", 10));
+	//showMessage(clDarkGrey, clGreen, 10, SIZEY + 5, to_string(BEAR));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 6, makeLength("BOMB", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("DETONATOR", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("EXIT", 10));
+
 	//display menu options available
 	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
