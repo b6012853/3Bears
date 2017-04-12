@@ -54,11 +54,6 @@ struct Item {
 	bool visible;
 };
 
-struct Bomb {
-	Item item;
-	bool active;
-};
-
 struct Bear {
 	int x, y;
 	char symbol;
@@ -80,14 +75,14 @@ struct Player{
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs);
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	bool isCheatKey(const char key);
 	int  getKeyPress();
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Bomb> bombs);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	string paintEntryScreen();
@@ -105,10 +100,10 @@ int main()
 	bears.push_back(Bear());
 	
 
-	vector<Bomb> bombs;
+	vector<Item> bombs;
 	const int noOfBombs = bombs.size();
 	for (int i = 0; i < 6; i++)
-		bombs.push_back(Bomb()); //Item 0 detenator, 1+ are bombs
+		bombs.push_back(Item()); //Item 0 detenator, 1+ are bombs
 
 	bool forceQuit = false;
 	int noOfMoves(0);
@@ -161,11 +156,11 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs)
 { //initialise grid & place bear in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Bear> bears, vector<Bomb> bombs);
+	void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Bear> bears, vector<Item> bombs);
 
 	setInitialMazeStructure(maze);		//initialise maze
 	setInitialDataFromMaze(maze, bears, bombs);	//initialise bear's position
@@ -201,7 +196,7 @@ void setInitialMazeStructure(char maze[][SIZEX])
 				case 5: maze[row][col] = EXIT; break;
 			}
 }
-void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs)
+void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs)
 { //extract bear's coordinates from initial maze info
 	int noOfBears = 0;
 	int noOfBombs = 1; //Start from 1 as 0 is the detonator.
@@ -221,21 +216,19 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 				}
 				case DETONATOR:
 				{		
-					bombs[0].item.x = col;
-					bombs[0].item.y = row;
-					bombs[0].item.symbol = DETONATOR;
-					bombs[0].item.visible = true;
-					bombs[0].active = false;
+					bombs[0].x = col;
+					bombs[0].y = row;
+					bombs[0].symbol = DETONATOR;
+					bombs[0].visible = true;
 					maze[row][col] = TUNNEL;
 					break;
 				}
 				case BOMB:
 				{
-					bombs[noOfBombs].item.x = col;
-					bombs[noOfBombs].item.y = row;
-					bombs[noOfBombs].item.symbol = BOMB;
-					bombs[noOfBombs].item.visible = true;
-					bombs[noOfBombs].active = true;
+					bombs[noOfBombs].x = col;
+					bombs[noOfBombs].y = row;
+					bombs[noOfBombs].symbol = BOMB;
+					bombs[noOfBombs].visible = true;
 					noOfBombs++;
 					maze[row][col] = TUNNEL;
 					break;
@@ -247,11 +240,11 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Bomb
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear> bears, const vector<Bomb> bombs)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear> bears, const vector<Item> bombs)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
 	void placeBear(char g[][SIZEX], const Bear bear);
-	void placeBomb(char g[][SIZEX], const Bomb bomb);
+	void placeBomb(char g[][SIZEX], const Item bomb);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
 	for (auto bear : bears)
@@ -278,16 +271,16 @@ void placeBear(char g[][SIZEX], const Bear bear)
 		g[bear.y][bear.x] = bear.symbol;
 }
 
-void placeBomb(char g[][SIZEX], const Bomb bomb)
+void placeBomb(char g[][SIZEX], const Item bomb)
 {
-	if (bomb.item.visible)
-		g[bomb.item.y][bomb.item.x] = bomb.item.symbol;
+	if (bomb.visible)
+		g[bomb.y][bomb.x] = bomb.symbol;
 }
 
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, const int key, string& mess, int& numberOfMoves, const Player& player)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -300,7 +293,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	char maze[SIZEY][SIZEX];
 	setMaze(maze, g);
 
-	void removeBombs(vector<Bomb>& bombs);
+	void removeBombs(vector<Item>& bombs);
 	mess = "                                         ";		//reset message to blank
 	const int noOfBombs = bombs.size();
 
@@ -317,10 +310,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 			case TUNNEL:		//can move
 				if (!player.cheating)
 				{
-					if (bear.y == bombs[0].item.y && bear.x == bombs[0].item.x) //Reset so the detonator is visible when the bear moves off it.
+					if (bear.y == bombs[0].y && bear.x == bombs[0].x) //Reset so the detonator is visible when the bear moves off it.
 					{
-						bombs[0].active = false;	//Deactivate the detonator.
-						bombs[0].item.visible = true;
+						bombs[0].visible = true;
 					}
 					else
 						if (!bear.moved)
@@ -330,10 +322,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				{
 					for (int b = 0; b < noOfBombs; b++)
 					{
-						if (bear.y == bombs[b].item.y && bear.x == bombs[b].item.x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
+						if (bear.y == bombs[b].y && bear.x == bombs[b].x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
 						{
-							bombs[b].active = false;
-							bombs[b].item.visible = true;
+							bombs[b].visible = true;
 						}
 						else
 							if (!bear.moved)
@@ -370,8 +361,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 				}
 				break;
 			case DETONATOR:
-				bombs[0].active = true;	//Activate the detonator
-				bombs[0].item.visible = false;
+				bombs[0].visible = false;
 				bear.y += dy;	//move the bear onto the detonator
 				bear.x += dx;
 				bear.moved = true;
@@ -404,9 +394,9 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 					}
 					for (int b = 0; b < noOfBombs; b++)
 					{
-						if (bear.y == bombs[b].item.y && bear.x == bombs[b].item.x)
+						if (bear.y == bombs[b].y && bear.x == bombs[b].x)
 						{
-							bombs[b].item.visible = false;
+							bombs[b].visible = false;
 						}
 						else
 							if (!bear.moved)
@@ -450,14 +440,13 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Bomb>& bo
 	return forceQuit;
 }
 
-void removeBombs(vector<Bomb>& bombs)
+void removeBombs(vector<Item>& bombs)
 {
 	//The detonator was walked on
 	const int noOfBombs = bombs.size();
 	for (int b = 0; b < noOfBombs; b++)
 	{
-		bombs[b].active = false;
-		bombs[b].item.visible = false;
+		bombs[b].visible = false;
 	}
 }
 //---------------------------------------------------------------------------
