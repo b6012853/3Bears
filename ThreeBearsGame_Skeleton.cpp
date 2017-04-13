@@ -145,7 +145,8 @@ int main()
 				message = "INVALID KEY!";	//set 'Invalid key' message
 		}
 		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
-		if( !forceQuit ) key = getKeyPress(); 			//display menu & read in next option
+		if( !forceQuit ) 
+			key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
 	return 0;
@@ -311,9 +312,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				if (!player.cheating)
 				{
 					if (bear.y == bombs[0].y && bear.x == bombs[0].x) //Reset so the detonator is visible when the bear moves off it.
-					{
 						bombs[0].visible = true;
-					}
 					else
 						if (!bear.moved)
 							maze[bear.y][bear.x] = TUNNEL;
@@ -323,9 +322,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 					for (int b = 0; b < noOfBombs; b++)
 					{
 						if (bear.y == bombs[b].y && bear.x == bombs[b].x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
-						{
 							bombs[b].visible = true;
-						}
 						else
 							if (!bear.moved)
 								maze[bear.y][bear.x] = TUNNEL;
@@ -367,9 +364,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				bear.moved = true;
 				moved++;
 				if (!player.cheating)
-				{
 					removeBombs(bombs);
-				}
 				break;
 			case BOMB:
 				if (!player.cheating)
@@ -395,9 +390,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 					for (int b = 0; b < noOfBombs; b++)
 					{
 						if (bear.y == bombs[b].y && bear.x == bombs[b].x)
-						{
 							bombs[b].visible = false;
-						}
 						else
 							if (!bear.moved)
 								maze[bear.y][bear.x] = TUNNEL;
