@@ -85,6 +85,7 @@ int main()
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	void paintMainMenu();
 	string paintEntryScreen();
 	Player player;
 	Player loadPlayer(const string playerName);
@@ -117,6 +118,8 @@ int main()
 		cout << "Created new player save folder: " << playerFileLocation;
 	}
 	player = loadPlayer(paintEntryScreen()); //Load the details of the player (if any) from file.
+	paintMainMenu();
+
 	//action...
 	initialiseGame(grid, maze, bears, bombs, detonator);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves, player);			//display game info, modified grid & messages
@@ -674,6 +677,81 @@ string paintEntryScreen()
 	Clrscr();
 	return finalName;
 }
+
+//void paintMainMenu()
+//{
+//	int selection = 4;
+//	Gotoxy(8, 1);
+//	cout << "Main Menu";
+//	Gotoxy(8, 2);
+//	cout << "---------";
+//	Gotoxy(8, 4);
+//	cout << "Start Game";
+//	Gotoxy(8, 5);
+//	cout << "Rules";
+//	Gotoxy(8, 6);
+//	cout << "Previous Score";
+//	Gotoxy(8, 7);
+//	cout << "Quit";
+//
+//	int getKeyPress();
+//	int key = getKeyPress();
+//	
+//	while (key != 13)
+//	{
+//		//Output selector
+//		Gotoxy(6, selection + 3); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
+//		cout << ">";
+//		
+//		if (key == UP		 && selection > 1)
+//			selection--;
+//		else if (key == DOWN && selection < 4)
+//			selection++;
+//		key = getKeyPress();
+//	}
+//	Clrscr(); //Clear the screen - so no menu is left over in the game window.
+//}
+
+void paintMainMenu()
+{
+	const int noOfMenuItems = 4;
+	string MenuItems[noOfMenuItems] =
+	{ "Start Game",			//To add new menu items:
+	  "Rules",				//   -Adjust the noOfMenuItems accordingly
+	  "Previous Score",		//   -Add it to this array
+	  "Quit" };				//The loops below will handle the render and selection. Change the switch in the caller to change behaviour.
+	int selection = 1;
+
+	int getKeyPress();
+	int key=72;
+	
+	do {
+		Gotoxy(8, 1);
+		cout << "Main Menu"; //Menu header
+		Gotoxy(8, 2);
+		cout << "---------";
+		
+		for (int menuItem = 0; menuItem < noOfMenuItems; menuItem++)
+		{
+			Gotoxy(8, menuItem + 3);	 //X and Y pos of the menu item, Y has an offset added to account for the header.
+			cout << MenuItems[menuItem]; //Output each menu option
+		}
+
+		if (key == UP && selection > 1)
+			selection--;
+		else if (key == DOWN && selection < 4)
+			selection++;
+
+		//Output selector
+		Gotoxy(6, selection + 2); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
+		cout << ">";
+		Gotoxy(0, 0);
+
+		key = getKeyPress();
+		Clrscr();
+	} while (key != 13);
+}
+
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	Gotoxy(0, 4);
