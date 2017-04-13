@@ -102,9 +102,11 @@ int main()
 
 	vector<Item> bombs;
 	Item detonator;
-	const int noOfBombs = bombs.size();
-	for (int i = 0; i < 6; i++)
-		bombs.push_back(Item()); //Item 0 detenator, 1+ are bombs
+	const int noOfBombs = 5;
+	for (int b = 0; b < noOfBombs; b++) //b for Bomb
+	{
+		bombs.push_back(Item());
+	}
 
 	bool forceQuit = false;
 	int noOfMoves(0);
@@ -148,8 +150,10 @@ int main()
 				message = "INVALID KEY!";	//set 'Invalid key' message
 		}
 		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
-		if( !forceQuit ) 
+		if (!forceQuit)
+		{
 			key = getKeyPress(); 			//display menu & read in next option
+		}
 	}
 	endProgram();						//display final message
 	return 0;
@@ -512,12 +516,12 @@ Player loadPlayer(const string playerName)
 	ifstream fin(fileName, ios::in); //Open the file
 	if (fin.fail())	//Check if the open was successful.
 	{
-		p.name = playerName;
+		p.name = playerName; //File must not exist, so default values are assigned.
 		p.score = 500;
 	}
 	else 
 	{
-		//  file open successfully: process the file
+		//File open successfully, load the values from the file.
 		fin >> p.name; fin.get();
 		fin >> p.score;
 		fin.close();
@@ -538,7 +542,7 @@ void savePlayer(const Player& player)
 	}
 	else 
 	{
-		//  file open successfully: process the file
+		//Save the required data in the file.
 		fout << player.name << "\n" << player.score;
 		fout.close();
 	}
@@ -567,10 +571,6 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	void paintGrid(const char g[][SIZEX]);
 	string calcTime();
 	string makeLength(string s, int length);
-
-	//display game title
-	//showMessage(clBlack, clYellow, 0, 0, "___GAME___");
-	//showMessage(clWhite, clRed, 40, 1, "FoP Task 1c: February 2017");
 
 	//display score
 	showMessage(clYellow, clBlack, 0, 0, "THREE BEARS GAME");
@@ -720,7 +720,9 @@ string calcTime()
 string makeLength(string s, int length)
 {
 	while (s.length() < length)
+	{
 		s.append(" ");
+	}
 	return s;
 }
 
