@@ -678,40 +678,6 @@ string paintEntryScreen()
 	return finalName;
 }
 
-//void paintMainMenu()
-//{
-//	int selection = 4;
-//	Gotoxy(8, 1);
-//	cout << "Main Menu";
-//	Gotoxy(8, 2);
-//	cout << "---------";
-//	Gotoxy(8, 4);
-//	cout << "Start Game";
-//	Gotoxy(8, 5);
-//	cout << "Rules";
-//	Gotoxy(8, 6);
-//	cout << "Previous Score";
-//	Gotoxy(8, 7);
-//	cout << "Quit";
-//
-//	int getKeyPress();
-//	int key = getKeyPress();
-//	
-//	while (key != 13)
-//	{
-//		//Output selector
-//		Gotoxy(6, selection + 3); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
-//		cout << ">";
-//		
-//		if (key == UP		 && selection > 1)
-//			selection--;
-//		else if (key == DOWN && selection < 4)
-//			selection++;
-//		key = getKeyPress();
-//	}
-//	Clrscr(); //Clear the screen - so no menu is left over in the game window.
-//}
-
 void paintMainMenu()
 {
 	const int noOfMenuItems = 4;
@@ -726,14 +692,15 @@ void paintMainMenu()
 	int key=72;
 	
 	do {
-		Gotoxy(8, 1);
-		cout << "Main Menu"; //Menu header
-		Gotoxy(8, 2);
-		cout << "---------";
+		showMessage(clDarkGrey, clYellow, 8, 1, "        THREE BEARS GAME        "); //Menu Header
+		showMessage(clDarkGrey, clYellow, 8, 2, "            Main Menu           ");
+
+		SelectBackColour(clBlack);
+		SelectTextColour(clWhite);
 		
 		for (int menuItem = 0; menuItem < noOfMenuItems; menuItem++)
 		{
-			Gotoxy(8, menuItem + 3);	 //X and Y pos of the menu item, Y has an offset added to account for the header.
+			Gotoxy(8, menuItem + 4);	 //X and Y pos of the menu item, Y has an offset added to account for the header.
 			cout << MenuItems[menuItem]; //Output each menu option
 		}
 
@@ -743,7 +710,7 @@ void paintMainMenu()
 			selection++;
 
 		//Output selector
-		Gotoxy(6, selection + 2); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
+		Gotoxy(6, selection + 3); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
 		cout << ">";
 		Gotoxy(0, 0);
 
