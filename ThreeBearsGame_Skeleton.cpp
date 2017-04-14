@@ -419,6 +419,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				{
 					forceQuit = true;
 					mess = "You just killed a bear, you sad person!  ";
+					showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
 					maze[bear.y][bear.x] = TUNNEL;
 					bear.y += dy;	//move the bear onto the detonator
 					bear.x += dx;
