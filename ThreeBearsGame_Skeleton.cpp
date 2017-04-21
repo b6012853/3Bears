@@ -108,7 +108,7 @@ int main()
 		bombs.push_back(Item());
 	}
 
-	bool forceQuit = false;
+	bool gameEnd = false;
 	int noOfMoves(0);
 
 	//Entry screen
@@ -121,7 +121,7 @@ int main()
 	initialiseGame(grid, maze, bears, bombs, detonator);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves, player);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
-	while (!wantsToQuit(key) && !forceQuit)			//while user does not want to quit
+	while (!wantsToQuit(key) && !gameEnd)			//while user does not want to quit
 	{
 		if (isCheatKey(key))
 		{
@@ -135,7 +135,7 @@ int main()
 		else {
 			if (isArrowKey(key))
 			{
-				forceQuit = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player);		//move bear in that direction
+				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player);		//move bear in that direction
 				if (bears.empty())
 				{
 					if (player.score > noOfMoves && !player.cheated) //If the new score is lower and they haven't cheated
@@ -150,7 +150,7 @@ int main()
 				message = "INVALID KEY!";	//set 'Invalid key' message
 		}
 		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
-		if (!forceQuit)
+		if (!gameEnd)
 		{
 			key = getKeyPress(); 			//display menu & read in next option
 		}
@@ -300,7 +300,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 	void setMaze(char grid[][SIZEX], const char maze[][SIZEX]);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void endProgram();
-	bool forceQuit = false;
+	bool gameEnd = false;
 	assert(isArrowKey(key));
 	
 	char maze[SIZEY][SIZEX];
@@ -381,7 +381,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 			case BOMB:
 				if (!player.cheating)
 				{
-					forceQuit = true;
+					gameEnd = true;
 					mess = "You just killed a bear, you sad person!  ";
 					maze[bear.y][bear.x] = TUNNEL;
 					bear.y += dy;	//move the bear onto the detonator
@@ -435,14 +435,14 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 	}
 	if (bears.empty())
 	{
-		forceQuit = true;
+		gameEnd = true;
 		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
 	}
 	if (!player.cheated)
 	{
 		numberOfMoves++;
 	}
-	return forceQuit;
+	return gameEnd;
 }
 
 void removeBombs(vector<Item>& bombs)
