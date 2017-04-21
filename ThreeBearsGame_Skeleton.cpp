@@ -489,11 +489,11 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				{
 					pill.taken = false;
 				}
-				for (unsigned int i = 0; i < bears.size(); i++)
+				for (unsigned int c = 0; c < bears.size(); c++)
 				{
-					if (maze[bears[i].y][bears[i].x] == EXIT)
+					if (maze[bears[c].y][bears[c].x] == EXIT)
 					{
-						deleteIndex = i; // assign index of a bear to be deleted after remaing bears move
+						deleteIndex = c; // assign index of a bear to be deleted after remaing bears move
 					}
 				}
 				break;
