@@ -18,6 +18,7 @@
 #include <vector>
 #include <fstream>
 #include <direct.h>
+#include <stdlib.h>
 using namespace std;
 
 //include our own libraries
@@ -37,6 +38,7 @@ const char WALL('#');    	//border
 const char BOMB('0');
 const char DETONATOR('T');
 const char EXIT('X');
+const char PILL('P');
 //defining the command letters to move the bear on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -52,6 +54,7 @@ struct Item {
 	int x, y;
 	char symbol;
 	bool visible;
+	bool active;
 };
 
 struct Bear {
@@ -59,6 +62,7 @@ struct Bear {
 	char symbol;
 	bool visible;
 	bool moved;
+	bool invincible;
 };
 
 struct Player{
@@ -68,6 +72,13 @@ struct Player{
 	bool cheating = false;
 };
 
+struct Pill
+{
+	Item item;
+	int moves;
+	bool taken;
+};
+
 //---------------------------------------------------------------------------
 //----- run game
 //---------------------------------------------------------------------------
@@ -75,14 +86,14 @@ struct Player{
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, Pill& pill);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, const vector<Bear>& bear);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	bool isCheatKey(const char key);
 	int  getKeyPress();
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator, Pill& pill);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	string paintEntryScreen();
@@ -99,6 +110,8 @@ int main()
 	bears.push_back(Bear());
 	bears.push_back(Bear());
 
+	srand(time(NULL));
+	Pill pill;
 
 	vector<Item> bombs;
 	Item detonator;
@@ -118,8 +131,8 @@ int main()
 	}
 	player = loadPlayer(paintEntryScreen()); //Load the details of the player (if any) from file.
 	//action...
-	initialiseGame(grid, maze, bears, bombs, detonator);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, bears.size(), noOfMoves, player);			//display game info, modified grid & messages
+	initialiseGame(grid, maze, bears, bombs, detonator, pill);	//initialise grid (incl. walls & bear)
+	paintGame(grid, message, bears.size(), noOfMoves, player, bears);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key) && !gameEnd)			//while user does not want to quit
 	{
@@ -135,7 +148,7 @@ int main()
 		else {
 			if (isArrowKey(key))
 			{
-				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player);		//move bear in that direction
+				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player, pill);		//move bear in that direction
 				if (bears.empty())
 				{
 					if (player.score > noOfMoves && !player.cheated) //If the new score is lower and they haven't cheated
@@ -144,12 +157,12 @@ int main()
 						savePlayer(player);			  //And update their file.
 					}
 				}
-				updateGrid(grid, maze, bears, bombs, detonator);			//update grid information
+				updateGrid(grid, maze, bears, bombs, detonator, pill);			//update grid information
 			}
 			else
 				message = "INVALID KEY!";	//set 'Invalid key' message
 		}
-		paintGame(grid, message, bears.size(), noOfMoves, player);		//display game info, modified grid & messages
+		paintGame(grid, message, bears.size(), noOfMoves, player, bears);		//display game info, modified grid & messages
 		if (!gameEnd)
 		{
 			key = getKeyPress(); 			//display menu & read in next option
@@ -164,15 +177,22 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Pill& pill)
 { //initialise grid & place bear in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
 	void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Bear> bears, vector<Item> bombs, const Item detonator);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Bear> bears, vector<Item> bombs, const Item detonator, Pill& pill);
+
+	pill.item.symbol = PILL;
+	pill.moves = 0;
+	pill.taken = false;
+	pill.item.visible = false;
+	pill.item.x = 0;
+	pill.item.y = 0;
 
 	setInitialMazeStructure(maze);		//initialise maze
 	setInitialDataFromMaze(maze, bears, bombs, detonator);	//initialise bear's position
-	updateGrid(grid, maze, bears, bombs, detonator);		//prepare grid
+	updateGrid(grid, maze, bears, bombs, detonator, pill);		//prepare grid
 }
 
 void setInitialMazeStructure(char maze[][SIZEX])
@@ -218,6 +238,7 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 					bears[noOfBears].y = row;
 					bears[noOfBears].symbol = BEAR;
 					bears[noOfBears].visible = true;
+					bears[noOfBears].invincible = false;
 					noOfBears++;
 					maze[row][col] = TUNNEL;
 					break;
@@ -228,6 +249,7 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 					detonator.y = row;
 					detonator.symbol = DETONATOR;
 					detonator.visible = true;
+					detonator.active = false;
 					maze[row][col] = TUNNEL;
 					break;
 				}
@@ -248,11 +270,12 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear> bears, const vector<Item> bombs, const Item detonator)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear> bears, const vector<Item> bombs, const Item detonator, Pill& pill)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
 	void placeBear(char g[][SIZEX], const Bear bear);
 	void placeBomb(char g[][SIZEX], const Item bomb);
+	void placePill(char g[][SIZEX], Pill& pill);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
 	for (auto bear : bears)
@@ -269,6 +292,7 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const vector<Bear>
 	{
 		grid[detonator.y][detonator.x] = detonator.symbol;
 	}
+	placePill(grid, pill);
 }
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
@@ -290,10 +314,35 @@ void placeBomb(char g[][SIZEX], const Item bomb)
 		g[bomb.y][bomb.x] = bomb.symbol;
 }
 
+void placePill(char g[][SIZEX], Pill& pill)
+{
+	if (pill.moves >= 10 && !pill.taken)
+	{
+		pill.moves = 0;
+		pill.item.visible = true;
+		bool placed = false;
+		while (placed == false)
+		{
+			int x = rand() % SIZEX;
+			int y = rand() % SIZEY;
+			if (g[y][x] == TUNNEL)
+			{
+				pill.item.x = x;
+				pill.item.y = y;
+				placed = true;
+			}
+		}
+	}
+	if (pill.item.visible)
+	{
+		g[pill.item.y][pill.item.x] = pill.item.symbol;
+	}
+	pill.moves++;
+}
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -321,7 +370,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 			switch (maze[bear.y + dy][bear.x + dx])
 			{			//...depending on what's on the target position in grid...
 			case TUNNEL:		//can move
-				if (!player.cheating)
+				if (!(player.cheating || bear.invincible))
 				{
 					if (bear.y == bombs[0].y && bear.x == bombs[0].x) //Reset so the detonator is visible when the bear moves off it.
 						detonator.visible = true;
@@ -331,9 +380,14 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				}
 				else
 				{
+					if (detonator.x == bear.x && detonator.y == bear.y) // redraw detonator after moving off it
+					{
+						maze[bear.y][bear.x] = DETONATOR;
+						detonator.visible = true;
+					}
 					for (int b = 0; b < noOfBombs; b++)
 					{
-						if (bear.y == bombs[b].y && bear.x == bombs[b].x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
+						if (bear.y == bombs[b].y && bear.x == bombs[b].x && (player.cheating || bear.invincible) && !detonator.active) //Reset so the bombs are visible when the bear moves off it.
 							bombs[b].visible = true;
 						else
 							if (!bear.moved)
@@ -370,16 +424,20 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				}
 				break;
 			case DETONATOR:
-				detonator.visible = false;
-				bear.y += dy;	//move the bear onto the detonator
-				bear.x += dx;
-				bear.moved = true;
-				moved++;
-				if (!player.cheating)
-					removeBombs(bombs);
+				if (!bear.moved)
+				{
+					detonator.active = true;
+					detonator.visible = false;
+					bear.y += dy;	//move the bear onto the detonator
+					bear.x += dx;
+					bear.moved = true;
+					moved++;
+					if (!player.cheating)
+						removeBombs(bombs);
+				}
 				break;
 			case BOMB:
-				if (!player.cheating)
+				if (!(player.cheating || bear.invincible))
 				{
 					gameEnd = true;
 					mess = "You just killed a bear, you sad person!  ";
@@ -409,11 +467,28 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 					}
 				}
 				break;
+			case PILL:
+				if (!bear.moved){
+					pill.item.visible = false;
+					maze[bear.y][bear.x] = TUNNEL;
+					bear.y += dy;	//move the bear onto the detonator
+					bear.x += dx;
+					maze[bear.y][bear.x] = BEAR;
+					bear.moved = true;
+					bear.invincible = true;
+					pill.taken = true;
+					moved++;
+				}
+				break;
 			case EXIT:
 				bear.y += dy;	//go in that Y direction
 				bear.x += dx;	//go in that X direction
 				bear.moved = true;
 				moved++;
+				if (bear.invincible)
+				{
+					pill.taken = false;
+				}
 				for (unsigned int i = 0; i < bears.size(); i++)
 				{
 					if (maze[bears[i].y][bears[i].x] == EXIT)
@@ -422,7 +497,6 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 					}
 				}
 				break;
-
 			}
 		}
 	}
@@ -564,11 +638,11 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, const vector<Bear>& bear)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	void paintGrid(const char g[][SIZEX]);
+	void paintGrid(const char g[][SIZEX], const vector<Bear>& bears);
 	string calcTime();
 	string makeLength(string s, int length);
 
@@ -599,16 +673,19 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clYellow, 0, 2, "RESCUED " + bearString);
 
 	//Key drawn under the maze.
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 5, makeLength("BEAR", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 5, makeLength("BEAR", 15));
 	SelectTextColour(clGreen);
 	cout << BEAR;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 6, makeLength("BOMB", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 6, makeLength("BOMB", 15));
 	SelectTextColour(clRed);
 	cout << BOMB;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("DETONATOR", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("DETONATOR", 15));
 	SelectTextColour(clYellow);
 	cout << DETONATOR;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("EXIT", 10));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("POWER UP PILL", 15));
+	SelectTextColour(clMagenta);
+	cout << PILL;
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("EXIT", 15));
 	SelectBackColour(clGrey);
 	SelectTextColour(clBlack);
 	cout << EXIT;
@@ -627,7 +704,7 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
 	// display grid contents
-	paintGrid(g);
+	paintGrid(g, bear);
 }
 string paintEntryScreen()
 {
@@ -674,7 +751,7 @@ string paintEntryScreen()
 	Clrscr();
 	return finalName;
 }
-void paintGrid(const char g[][SIZEX])
+void paintGrid(const char g[][SIZEX], const vector<Bear>& bears)
 { //display grid content on screen
 	Gotoxy(0, 4);
 	for (int row(0); row < SIZEY; ++row)
@@ -683,26 +760,42 @@ void paintGrid(const char g[][SIZEX])
 		{
 			switch (g[row][col])
 			{
-				case BOMB:
-					SelectBackColour(clBlack);
-					SelectTextColour(clRed);
-					break;
-				case BEAR:
-					SelectBackColour(clBlack);
-					SelectTextColour(clGreen);
-					break;
-				case DETONATOR:
-					SelectBackColour(clBlack);
-					SelectTextColour(clYellow);
-					break;
-				case EXIT:
-					SelectBackColour(clGrey);
-					SelectTextColour(clBlack);
-					break;
-				default:
-					SelectBackColour(clBlack);
-					SelectTextColour(clWhite);
-					break;
+			case BOMB:
+				SelectBackColour(clBlack);
+				SelectTextColour(clRed);
+				break;
+			case DETONATOR:
+				SelectBackColour(clBlack);
+				SelectTextColour(clYellow);
+				break;
+			case BEAR:
+				for (auto bear : bears)
+				{
+					if (bear.x == col && bear.y == row && bear.invincible)
+					{
+						SelectBackColour(clBlack);
+						SelectTextColour(clMagenta);
+						break;
+					}
+					else
+					{
+						SelectBackColour(clBlack);
+						SelectTextColour(clGreen);
+					}
+				}
+				break;
+			case EXIT:
+				SelectBackColour(clGrey);
+				SelectTextColour(clBlack);
+				break;
+			case PILL:
+				SelectBackColour(clBlack);
+				SelectTextColour(clMagenta);
+				break;
+			default:
+				SelectBackColour(clBlack);
+				SelectTextColour(clWhite);
+				break;
 			}
 			cout << g[row][col];	//output cell content
 		}
