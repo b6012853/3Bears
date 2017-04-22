@@ -333,7 +333,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				{
 					for (int b = 0; b < noOfBombs; b++)
 					{
-						if (bear.y == bombs[b].y && bear.x == bombs[b].x && player.cheating) //Reset so the bombs are visible when the bear moves off it.
+						if (bear.y == bombs[b].y && bear.x == bombs[b].x && player.cheating) //Reset so the bombs are visible when the bear moves off of them.
 							bombs[b].visible = true;
 						else
 							if (!bear.moved)
