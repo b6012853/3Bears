@@ -188,7 +188,6 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 		}
 		else
 		{
-			message = "Press any key to return to the main menu.";
 			getKeyPress();
 		}
 	}
@@ -473,7 +472,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 	if (bears.empty())
 	{
 		forceQuit = true;
-		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
+		showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
 	}
 	if (!player.cheated)
 	{
