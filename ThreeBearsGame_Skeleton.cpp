@@ -140,7 +140,7 @@ int main()
 void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player)
 {
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules);
 	int getKeyPress();
 	bool wantsToQuit(const int key);
 	bool isCheatKey(const char key);
@@ -150,23 +150,26 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator);
 
 	bool forceQuit = false;
+	bool showRules = false;
+
 	//action...
 	initialiseGame(grid, maze, bears, bombs, detonator);		//initialise grid (incl. walls & bear)
-	paintGame(grid, message, bears.size(), noOfMoves, player);	//display game info, modified grid & messages
+	paintGame(grid, message, bears.size(), noOfMoves, player, showRules);	//display game info, modified grid & messages
 	int key(getKeyPress()); 									//read in selected key: arrow or letter command
 	while (!wantsToQuit(key) && !forceQuit)						//while user does not want to quit
 	{
-		if (isCheatKey(key))
+		if (key != 'F' && !showRules)
 		{
-			player.cheated = true;
-			player.cheating = !player.cheating;
-			noOfMoves = 500;
-			cout << "\a";
-			cout << "\a";
-			cout << "\a";
-		}
-		else {
-			if (isArrowKey(key))
+			if (isCheatKey(key))
+			{
+				player.cheated = true;
+				player.cheating = !player.cheating;
+				noOfMoves = 500;
+				cout << "\a";
+				cout << "\a";
+				cout << "\a";
+			}
+			else if (isArrowKey(key))
 			{
 				forceQuit = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player);	//move bear in that direction
 				if (bears.empty())
@@ -182,7 +185,15 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 			else
 				message = "INVALID KEY!";  //set 'Invalid key' message
 		}
-		paintGame(grid, message, bears.size(), noOfMoves, player);	//display game info, modified grid & messages
+		else if (key == 'F')
+		{
+			if (!showRules)
+				showRules = true;
+			else
+				showRules = false;
+		}
+			
+		paintGame(grid, message, bears.size(), noOfMoves, player, showRules);	//display game info, modified grid & messages
 		
 		if (!forceQuit)
 		{
@@ -637,7 +648,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -689,13 +700,30 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	//display menu options available
 	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
-	showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
-	showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
-	showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
-	showMessage(clDarkGrey, clWhite, 40, 16, " To disable bombs use detonator 'T' ");
-	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
-	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
-	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
+
+	if (showRules)
+	{
+		showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
+		showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
+		showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
+		showMessage(clDarkGrey, clWhite, 40, 16, " To disable bombs use detonator 'T' ");
+		showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
+		showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
+		showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
+		showMessage(clBlack, clWhite, 40, 21, "Game paused... press 'F' to resume.");
+	}
+	else
+	{
+		showMessage(clDarkGrey, clWhite, 40, 13, " Press F to display the rules.      ");
+		showMessage(clBlack, clWhite, 40, 14, "                                    ");
+		showMessage(clBlack, clWhite, 40, 15, "                                    ");
+		showMessage(clBlack, clWhite, 40, 16, "                                    ");
+		showMessage(clBlack, clWhite, 40, 17, "                                    ");
+		showMessage(clBlack, clWhite, 40, 18, "                                    ");
+		showMessage(clBlack, clWhite, 40, 19, "                                    ");
+		showMessage(clBlack, clWhite, 40, 21, "                                    ");
+	}
+
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
