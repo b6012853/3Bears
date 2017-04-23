@@ -121,10 +121,11 @@ int main()
 			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player);
 			break;
 		case 2:
-
+			
 			break;
 		case 3:
-
+			void displayHighscore(Player player);
+			displayHighscore(player);
 			break;
 		default:
 			break;
@@ -139,7 +140,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 {
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator);
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player);
-	int  getKeyPress();
+	int getKeyPress();
 	bool wantsToQuit(const int key);
 	bool isCheatKey(const char key);
 	bool isArrowKey(const int k);
@@ -192,6 +193,24 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 		}
 	}
 	Clrscr();
+}
+
+void displayHighscore(Player player)
+{
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	string makeLength(string s, int length);
+	int getKeyPress();
+
+	showMessage(clDarkGrey, clYellow, 8, 1, " CURRENT PLAYER: " + makeLength(player.name, 24));
+	showMessage(clDarkGrey, clYellow, 8, 2, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 24));
+	showMessage(clBlack, clWhite, 8, 4, " Press any key to return.");
+	getKeyPress();
+	Clrscr();
+}
+
+void displayRules()
+{
+
 }
 
 
