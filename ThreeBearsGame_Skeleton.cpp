@@ -121,7 +121,8 @@ int main()
 			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player);
 			break;
 		case 2:
-			
+			void displayRules();
+			displayRules();
 			break;
 		case 3:
 			void displayHighscore(Player player);
@@ -204,13 +205,30 @@ void displayHighscore(Player player)
 	showMessage(clDarkGrey, clYellow, 8, 1, " CURRENT PLAYER: " + makeLength(player.name, 24));
 	showMessage(clDarkGrey, clYellow, 8, 2, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 24));
 	showMessage(clBlack, clWhite, 8, 4, " Press any key to return.");
+	Gotoxy(0, 0);
+
 	getKeyPress();
 	Clrscr();
 }
 
 void displayRules()
 {
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	int getKeyPress();
 
+	showMessage(clDarkGrey, clYellow, 8, 1, "        THREE BEARS GAME        ");
+	showMessage(clDarkGrey, clYellow, 8, 2, "              Rules             ");
+
+	showMessage(clDarkGrey, clWhite, 8, 4, " Rescue all bears '@' through       ");
+	showMessage(clDarkGrey, clWhite, 8, 5, " exit 'X' avoiding bombs 'O'        ");
+	showMessage(clDarkGrey, clWhite, 8, 6, " To disable bombs use detonator 'T' ");
+	showMessage(clDarkGrey, clWhite, 8, 7, "                                    ");
+	showMessage(clDarkGrey, clWhite, 8, 8, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clDarkGrey, clWhite, 8, 9, " TO QUIT ENTER 'Q'                  ");
+	showMessage(clBlack, clWhite, 0, 0, ""); //Reset position and colour (otherwise the console would have a grey background colour).
+
+	getKeyPress();
+	Clrscr();
 }
 
 
