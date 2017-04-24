@@ -155,6 +155,7 @@ int main()
 					{
 						player.score = noOfMoves; //Change their player record
 						savePlayer(player);			  //And update their file.
+						
 					}
 				}
 				updateGrid(grid, maze, bears, bombs, detonator, pill);			//update grid information
@@ -628,6 +629,7 @@ void savePlayer(const Player& player)
 		fout.close();
 	}
 }
+
 
 //---------------------------------------------------------------------------
 //----- display info on screen
