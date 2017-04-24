@@ -370,13 +370,20 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 			switch (maze[bear.y + dy][bear.x + dx])
 			{			//...depending on what's on the target position in grid...
 			case TUNNEL:		//can move
-				if (!(player.cheating || bear.invincible))
+				if (player.cheating || bear.invincible)
 				{
-					if (bear.y == bombs[0].y && bear.x == bombs[0].x) //Reset so the detonator is visible when the bear moves off it.
+					if (detonator.x == bear.x && detonator.y == bear.y) //Reset so the detonator is visible when the bear moves off it.
 						detonator.visible = true;
 					else
 						if (!bear.moved)
-							maze[bear.y][bear.x] = TUNNEL;
+							for (int b = 0; b < noOfBombs; b++)
+							{
+								if (bear.y == bombs[b].y && bear.x == bombs[b].x && (player.cheating || bear.invincible) && !detonator.active) //Reset so the bombs are visible when the bear moves off it.
+									bombs[b].visible = true;
+								else
+									if (!bear.moved)
+										maze[bear.y][bear.x] = TUNNEL;
+							}
 				}
 				else
 				{
