@@ -44,6 +44,7 @@ const int  RIGHT(77);		//right arrow
 const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
+const char CHEAT('C');		//To activate cheat mode
 
 const string playerFileLocation = "players\\";
 const string playerFileType = ".txt";
@@ -503,7 +504,7 @@ bool isArrowKey(const int key)
 }
 bool isCheatKey(const char key)
 {	//Check if the user has entered the cheat key (C)
-	return (key == 'C');
+	return (toupper(key) == CHEAT);
 }
 bool wantsToQuit(const int key)
 {	//check if the user wants to quit (when key is 'Q' or 'q')
