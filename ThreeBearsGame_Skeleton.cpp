@@ -47,6 +47,7 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 const char CHEAT('C');		//To activate cheat mode
+//Add global key here for rules (Liam).
 
 const string playerFileLocation = "players\\";
 const string playerFileType = ".txt";
@@ -107,9 +108,8 @@ int main()
 	char maze[SIZEY][SIZEX];	//structure of the maze
 	string message("LET'S START...");	//current message to player
 	vector<Bear> bears;
-	bears.push_back(Bear());
-	bears.push_back(Bear());
-	bears.push_back(Bear());
+	for (int b = 0; b < 3; b++) //b for bears
+		bears.push_back(Bear());
 
 	srand(time(NULL));
 	Pill pill;
@@ -534,7 +534,7 @@ void removeBombs(vector<Item>& bombs)
 	const int noOfBombs = bombs.size();
 	for (int b = 0; b < noOfBombs; b++)
 	{
-		bombs[b].visible = false;
+		bombs[b].visible = false; //Change the visibility of each one
 	}
 }
 //---------------------------------------------------------------------------
@@ -692,10 +692,10 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("DETONATOR", 15));
 	SelectTextColour(clYellow);
 	cout << DETONATOR;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("POWER UP PILL", 15));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("POWER UP PILL", 15));
 	SelectTextColour(clMagenta);
 	cout << PILL;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("EXIT", 15));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 9, makeLength("EXIT", 15));
 	SelectBackColour(clGrey);
 	SelectTextColour(clBlack);
 	cout << EXIT;
@@ -774,34 +774,34 @@ void paintGrid(const char g[][SIZEX], const vector<Bear>& bears)
 					SelectBackColour(clBlack);
 					SelectTextColour(clRed);
 					break;
-			case DETONATOR:
-				SelectBackColour(clBlack);
-				SelectTextColour(clYellow);
-				break;
-				case BEAR:
-				for (auto bear : bears)
-				{
-					if (bear.x == col && bear.y == row && bear.invincible)
-					{
+				case DETONATOR:
 					SelectBackColour(clBlack);
-						SelectTextColour(clMagenta);
+					SelectTextColour(clYellow);
 					break;
-					}
-					else
+				case BEAR:
+					for (auto bear : bears)
 					{
-					SelectBackColour(clBlack);
-						SelectTextColour(clGreen);
+						if (bear.x == col && bear.y == row && bear.invincible)
+						{
+						SelectBackColour(clBlack);
+							SelectTextColour(clMagenta);
+						break;
+						}
+						else
+						{
+						SelectBackColour(clBlack);
+							SelectTextColour(clGreen);
+						}
 					}
-				}
 					break;
 				case EXIT:
 					SelectBackColour(clGrey);
 					SelectTextColour(clBlack);
 					break;
-			case PILL:
-				SelectBackColour(clBlack);
-				SelectTextColour(clMagenta);
-				break;
+				case PILL:
+					SelectBackColour(clBlack);
+					SelectTextColour(clMagenta);
+					break;
 				default:
 					SelectBackColour(clBlack);
 					SelectTextColour(clWhite);
