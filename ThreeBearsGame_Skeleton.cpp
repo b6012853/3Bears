@@ -39,6 +39,8 @@ const char BOMB('0');
 const char DETONATOR('T');
 const char EXIT('X');
 const char PILL('P');
+const char LOCK('L');
+const char KEY('K');
 //defining the command letters to move the bear on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -181,7 +183,8 @@ int main()
 
 void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Pill& pill)
 { //initialise grid & place bear in middle
-	void setInitialMazeStructure(char maze[][SIZEX]);
+	//void setInitialMazeStructure(char maze[][SIZEX]);
+	void loadLevel(int LevelNo, char maze[][SIZEX]);
 	void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Bear> bears, vector<Item> bombs, const Item detonator, Pill& pill);
 
@@ -192,7 +195,8 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears,
 	pill.item.x = 0;
 	pill.item.y = 0;
 
-	setInitialMazeStructure(maze);		//initialise maze
+	//setInitialMazeStructure(maze);		//initialise maze
+	loadLevel(1, maze);
 	setInitialDataFromMaze(maze, bears, bombs, detonator);	//initialise bear's position
 	updateGrid(grid, maze, bears, bombs, detonator, pill);		//prepare grid
 }
@@ -267,7 +271,34 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 				}
 			}
 }
-
+void loadLevel(int LevelNo, char maze[][SIZEX])
+{
+	ifstream level;
+	string line;
+	level.open("levels\\level" + to_string(LevelNo) + ".txt");
+	if (level.is_open())
+	{
+		for (int row(0); row < SIZEY; ++row)
+		{
+			getline(level, line);
+			for (int col(0); col < SIZEX; ++col)
+			{
+				int current = line[col] - '0';
+				switch (current)
+				{
+				case 0: maze[row][col] = TUNNEL; break;
+				case 1: maze[row][col] = WALL; break;
+				case 2: maze[row][col] = BEAR; break;
+				case 3: maze[row][col] = BOMB; break;
+				case 4: maze[row][col] = DETONATOR; break;
+				case 5: maze[row][col] = EXIT; break;
+				case 6: maze[row][col] = LOCK; break;
+				case 7: maze[row][col] = KEY; break;
+				}
+			}
+		}
+	}
+}
 //---------------------------------------------------------------------------
 //----- update grid state
 //---------------------------------------------------------------------------
