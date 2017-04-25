@@ -205,10 +205,9 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 						highscores.at(5) = player;
 						saveHighscores(highscores);
 					}
-					updateGrid(grid, maze, bears, bombs, detonator, pill, lock, lKey);			//update grid information
+					
 				}
-				else
-					message = "INVALID KEY!";  //set 'Invalid key' message
+				updateGrid(grid, maze, bears, bombs, detonator, pill, lock, lKey);			//update grid information
 			}
 			else if (key == 'F')
 			{
@@ -217,6 +216,8 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 				else
 					showRules = false;
 			}
+			else
+				message = "INVALID KEY!";  //set 'Invalid key' message
 
 			paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);	//display game info, modified grid & messages
 
@@ -543,8 +544,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 									bombs[b].visible = true;
 								else
 									if (!bear.moved)
-							maze[bear.y][bear.x] = TUNNEL;
-				}
+										maze[bear.y][bear.x] = TUNNEL;
+							}
 				}
 				else
 				{
@@ -633,8 +634,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 							if (!bear.moved)
 							{
 								maze[bear.y][bear.x] = TUNNEL; bombs[b].visible = false;
-					}
-				}
+							}
+						}
 					}
 				}
 				break;
@@ -669,9 +670,10 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				}
 				break;
 			case LOCK:
-				if (!bear.moved){
-					if (lock.active)
+				if (!bear.moved)
 				{
+					if (lock.active)
+					{
 						bear.moved = true;
 						moved++;
 					}
@@ -683,10 +685,11 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 						moved++;
 						maze[bear.y][bear.x] = BEAR;
 					}
-					}
+				}
 				break;
 			case KEY:
-				if (!bear.moved){
+				if (!bear.moved)
+				{
 					bear.y += dy;	//go in that Y direction
 					bear.x += dx;	//go in that X direction
 					bear.moved = true;
