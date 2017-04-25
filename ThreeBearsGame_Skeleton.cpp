@@ -19,6 +19,7 @@
 #include <fstream>
 #include <direct.h>
 #include <stdlib.h>
+#include <algorithm>
 using namespace std;
 
 //include our own libraries
@@ -90,28 +91,25 @@ struct Pill
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& key);
-	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, const vector<Bear>& bear);
-	bool wantsToQuit(const int key);
-	bool isArrowKey(const int k);
-	bool isCheatKey(const char key);
-	int  getKeyPress();
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill, Item& lock, Item& lKey);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator, Pill& pill, Item& lock, Item& key);
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	int paintMainMenu();
+	void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores);
 	string paintEntryScreen();
 	Player player;
 	Player loadPlayer(const string playerName);
-	void savePlayer(const Player& player);
+	vector<Player> loadHighscore();
+
+	
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
 	char maze[SIZEY][SIZEX];	//structure of the maze
 	string message("LET'S START...");	//current message to player
+	vector<Player> highscores = loadHighscore();
 	vector<Bear> bears;
 	for (int b = 0; b < 3; b++) //b for bears
-		bears.push_back(Bear());
+	bears.push_back(Bear());
 
 	srand(time(NULL));
 	Pill pill;
@@ -124,7 +122,6 @@ int main()
 		bombs.push_back(Item());
 	}
 
-	bool gameEnd = false;
 	int noOfMoves(0);
 
 	//Entry screen
@@ -133,12 +130,57 @@ int main()
 		cout << "Created new player save folder: " << playerFileLocation;
 	}
 	player = loadPlayer(paintEntryScreen()); //Load the details of the player (if any) from file.
+	
+	int selection;
+
+	do {
+		selection = paintMainMenu();
+		switch (selection)
+		{
+		case 1:
+			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores);
+			break;
+		case 2:
+			void displayRules();
+			displayRules();
+			break;
+		case 3:
+			void displayHighscore(const Player& player, const vector<Player>& highscores);
+			displayHighscore(player, highscores);
+			break;
+		default:
+			break;
+		}
+	} while (selection != 4);
+	
+	endProgram();						//display final message
+	return 0;
+}
+
+void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores)
+{
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator);
+	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules);
+	int getKeyPress();
+	bool wantsToQuit(const int key);
+	bool isCheatKey(const char key);
+	bool isArrowKey(const int k);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player);
+	void savePlayer(const Player& player);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator);
+	void saveHighscores(vector<Player>& highscores);
+
+	bool forceQuit = false;
+	bool showRules = false;
+
 	//action...
-	initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, bears.size(), noOfMoves, player, bears);			//display game info, modified grid & messages
-	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
-	while (!wantsToQuit(key) && !gameEnd)			//while user does not want to quit
+	initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey);		//initialise grid (incl. walls & bear)
+	paintGame(grid, message, bears.size(), noOfMoves, player, showRules);	//display game info, modified grid & messages
+	int key(getKeyPress()); 									//read in selected key: arrow or letter command
+	while (!wantsToQuit(key) && !forceQuit)						//while user does not want to quit
 	{
+		if (key != 'F' && !showRules)
+		{
 		if (isCheatKey(key))
 		{
 			player.cheated = true;
@@ -148,32 +190,88 @@ int main()
 			cout << "\a";
 			cout << "\a";
 		}
-		else {
-			if (isArrowKey(key))
+			else if (isArrowKey(key))
 			{
-				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player, pill, lock, lKey);		//move bear in that direction
+				forceQuit = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player, pill, lock, lKey);		//move bear in that direction
 				if (bears.empty())
 				{
 					if (player.score > noOfMoves && !player.cheated) //If the new score is lower and they haven't cheated
 					{
 						player.score = noOfMoves; //Change their player record
-						savePlayer(player);			  //And update their file.
-						
+						savePlayer(player);		  //And update their file.
 					}
+					if (player.score < highscores.at(5).score)
+					{
+						highscores.at(5) = player;
+						saveHighscores(highscores);
 				}
 				updateGrid(grid, maze, bears, bombs, detonator, pill, lock, lKey);			//update grid information
 			}
 			else
-				message = "INVALID KEY!";	//set 'Invalid key' message
+				message = "INVALID KEY!";  //set 'Invalid key' message
 		}
-		paintGame(grid, message, bears.size(), noOfMoves, player, bears);		//display game info, modified grid & messages
-		if (!gameEnd)
+		else if (key == 'F')
 		{
-			key = getKeyPress(); 			//display menu & read in next option
+			if (!showRules)
+				showRules = true;
+			else
+				showRules = false;
 		}
+			
+		paintGame(grid, message, bears.size(), noOfMoves, player, showRules);	//display game info, modified grid & messages
+		
+		if (!forceQuit)
+		{
+			key = getKeyPress(); 		   //display menu & read in next option
+		}
+		else
+		{
+			getKeyPress();
 	}
-	endProgram();						//display final message
-	return 0;
+	}
+	Clrscr();
+}
+
+void displayHighscore( const Player& player, const vector<Player>& highscores )
+{
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	string makeLength(string s, int length);
+	int getKeyPress();
+	
+	showMessage(clDarkGrey, clYellow, 8, 1, " CURRENT PLAYER: " + makeLength(player.name, 24));
+	showMessage(clDarkGrey, clYellow, 8, 2, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 4, makeLength(" HIGHSCORES ", 24));
+	showMessage(clDarkGrey, clYellow, 8, 5, makeLength(" 1:  " + highscores.at(0).name + " - " + to_string(highscores.at(0).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 6, makeLength(" 2:  " + highscores.at(1).name + " - " + to_string(highscores.at(1).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 7, makeLength(" 3:  " + highscores.at(2).name + " - " + to_string(highscores.at(2).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 8, makeLength(" 4:  " + highscores.at(3).name + " - " + to_string(highscores.at(3).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 9, makeLength(" 5:  " + highscores.at(4).name + " - " + to_string(highscores.at(4).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 10, makeLength(" 6:  " + highscores.at(5).name + " - " + to_string(highscores.at(5).score), 24));
+	showMessage(clBlack, clWhite, 8, 12, " Press any key to return.");
+	Gotoxy(0, 0);
+
+	getKeyPress();
+	Clrscr();
+}
+
+void displayRules()
+{
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+	int getKeyPress();
+
+	showMessage(clDarkGrey, clYellow, 8, 1, "        THREE BEARS GAME        ");
+	showMessage(clDarkGrey, clYellow, 8, 2, "              Rules             ");
+
+	showMessage(clDarkGrey, clWhite, 8, 4, " Rescue all bears '@' through       ");
+	showMessage(clDarkGrey, clWhite, 8, 5, " exit 'X' avoiding bombs 'O'        ");
+	showMessage(clDarkGrey, clWhite, 8, 6, " To disable bombs use detonator 'T' ");
+	showMessage(clDarkGrey, clWhite, 8, 7, "                                    ");
+	showMessage(clDarkGrey, clWhite, 8, 8, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clDarkGrey, clWhite, 8, 9, " TO QUIT ENTER 'Q'                  ");
+	showMessage(clBlack, clWhite, 0, 0, ""); //Reset position and colour (otherwise the console would have a grey background colour).
+
+	getKeyPress();
+	Clrscr();
 }
 
 
@@ -202,6 +300,35 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears,
 	updateGrid(grid, maze, bears, bombs, detonator, pill, lock, key);		//prepare grid
 }
 
+void setInitialMazeStructure(char maze[][SIZEX])
+{ //set the position of the walls in the maze
+	//initialise maze configuration
+	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
+		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		    { 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1},
+			{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+			{ 1, 2, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+			{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1},
+			{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+			{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+	// with 1 for wall, 0 for tunnel, etc. 
+	//copy into maze structure
+	for (int row(0); row < SIZEY; ++row)	
+		for (int col(0); col < SIZEX; ++col)
+			switch (initialMaze[row][col])
+			{
+				case 0: maze[row][col] = TUNNEL; break;
+				case 1: maze[row][col] = WALL; break;
+				case 2: maze[row][col] = BEAR; break;
+				case 3: maze[row][col] = BOMB; break;
+				case 4: maze[row][col] = DETONATOR; break;
+				case 5: maze[row][col] = EXIT; break;
+			}
+}
 void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Item& lock, Item& key)
 { //extract bear's coordinates from initial maze info
 	int noOfBears = 0;
@@ -257,8 +384,8 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 					key.symbol = KEY;
 					key.visible = true;
 					break;
+				}
 			}
-}
 void loadLevel(int LevelNo, char maze[][SIZEX])
 {
 	ifstream level;
@@ -415,8 +542,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 									bombs[b].visible = true;
 								else
 									if (!bear.moved)
-										maze[bear.y][bear.x] = TUNNEL;
-							}
+							maze[bear.y][bear.x] = TUNNEL;
+				}
 				}
 				else
 				{
@@ -481,6 +608,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				{
 					gameEnd = true;
 					mess = "You just killed a bear, you sad person!  ";
+					showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
 					maze[bear.y][bear.x] = TUNNEL;
 					bear.y += dy;	//move the bear onto the detonator
 					bear.x += dx;
@@ -504,8 +632,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 							if (!bear.moved)
 							{
 								maze[bear.y][bear.x] = TUNNEL; bombs[b].visible = false;
-							}
-						}
+					}
+				}
 					}
 				}
 				break;
@@ -542,7 +670,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 			case LOCK:
 				if (!bear.moved){
 					if (lock.active)
-					{
+				{
 						bear.moved = true;
 						moved++;
 					}
@@ -554,7 +682,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 						moved++;
 						maze[bear.y][bear.x] = BEAR;
 					}
-				}
+					}
 				break;
 			case KEY:
 				if (!bear.moved){
@@ -581,8 +709,8 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 	}
 	if (bears.empty())
 	{
-		gameEnd = true;
-		showMessage(clBlack, clWhite, 40, 9, "FREEDOM!");
+		forceQuit = true;
+		showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
 	}
 	if (!player.cheated)
 	{
@@ -694,6 +822,70 @@ void savePlayer(const Player& player)
 	}
 }
 
+vector<Player> loadHighscore()
+{
+	bool compareScore(const Player player1, const Player player2);
+	const string fileName = playerFileLocation + "bestScores" + playerFileType;
+	vector<Player> highscores;
+	Player tempPlayer;
+	ifstream fin(fileName, ios::in); //Open the file
+	const int maxHighscores = 6;		//The maximum number of highscores that can be stored
+	if (fin.fail())	//Check if the open was successful.
+	{
+		void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+		showMessage(clRed, clYellow, 0, 20, "Failed to open file: " + fileName);
+	}
+	else
+	{
+		//File open successfully, load the values from the file.
+		for (int scores = 0; scores < maxHighscores; scores++)
+		{
+			if (fin)
+			{
+				fin >> tempPlayer.name;
+				//fin.get();
+				fin >> tempPlayer.score;
+				//fin.get();
+			}
+			else
+			{
+				tempPlayer.name = "anonymous";
+				tempPlayer.score = 500;
+			}
+			highscores.push_back(tempPlayer);
+		}
+		fin.close();
+	}
+	sort(highscores.begin(), highscores.end(), compareScore);
+	return highscores;
+}
+
+void saveHighscores(vector<Player>& highscores)
+{
+	bool compareScore(const Player player1, const Player player2);
+	const string fileName = playerFileLocation + "bestScores" + playerFileType;
+	ofstream fout(fileName, ios::out);
+	const int highscoresSize = highscores.size();
+	int player = 0;
+
+	if (fout.fail())	//Check if the open was successful.
+	{
+		void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
+	}
+	else
+	{
+		//Save the required data in the file.
+		for (player; player < highscoresSize; player++)
+		{
+			fout << highscores.at(player).name << endl;
+			fout << highscores.at(player).score << endl;
+		}
+		fout.close();
+	}
+	sort(highscores.begin(), highscores.end(), compareScore);
+}
+
 
 //---------------------------------------------------------------------------
 //----- display info on screen
@@ -711,7 +903,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, const vector<Bear>& bear)
+void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules, const vector<Bear>& bear)
 { //display game title, messages, maze, bear and other Bears on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -766,6 +958,9 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	//display menu options available
 	showMessage(clBlack, clWhite, 40, 5, "NUMBER OF MOVES: " + to_string(noOfMoves));
 	showMessage(clBlack, clWhite, 40, 6, "BEARS ESCAPED:   " + to_string(bears));
+
+	if (showRules)
+	{
 	showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
 	showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
 	showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
@@ -773,6 +968,20 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
 	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
 	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
+		showMessage(clBlack, clWhite, 40, 21, "Game paused... press 'F' to resume.");
+	}
+	else
+	{
+		showMessage(clDarkGrey, clWhite, 40, 13, " Press F to display the rules.      ");
+		showMessage(clBlack, clWhite, 40, 14, "                                    ");
+		showMessage(clBlack, clWhite, 40, 15, "                                    ");
+		showMessage(clBlack, clWhite, 40, 16, "                                    ");
+		showMessage(clBlack, clWhite, 40, 17, "                                    ");
+		showMessage(clBlack, clWhite, 40, 18, "                                    ");
+		showMessage(clBlack, clWhite, 40, 19, "                                    ");
+		showMessage(clBlack, clWhite, 40, 21, "                                    ");
+	}
+
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 	
@@ -824,6 +1033,49 @@ string paintEntryScreen()
 	Clrscr();
 	return finalName;
 }
+
+int paintMainMenu()
+{
+	const int noOfMenuItems = 4;
+	string MenuItems[noOfMenuItems] =
+	{ "Start Game",			//To add new menu items:
+	  "Rules",				//   -Adjust the noOfMenuItems accordingly
+	  "Highscores",		//   -Add it to this array
+	  "Quit" };				//The loops below will handle the render and selection. Change the switch in the caller to change behaviour.
+	int selection = 1;
+
+	int getKeyPress();
+	int key=72;
+	
+	do {
+		showMessage(clDarkGrey, clYellow, 8, 1, "        THREE BEARS GAME        "); //Menu Header
+		showMessage(clDarkGrey, clYellow, 8, 2, "            Main Menu           ");
+
+		SelectBackColour(clBlack);
+		SelectTextColour(clWhite);
+		
+		for (int menuItem = 0; menuItem < noOfMenuItems; menuItem++)
+		{
+			Gotoxy(8, menuItem + 4);	 //X and Y pos of the menu item, Y has an offset added to account for the header.
+			cout << MenuItems[menuItem]; //Output each menu option
+		}
+
+		if (key == UP && selection > 1)
+			selection--;
+		else if (key == DOWN && selection < 4)
+			selection++;
+
+		//Output selector
+		Gotoxy(6, selection + 3); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
+		cout << ">";
+		Gotoxy(0, 0);
+
+		key = getKeyPress();
+		Clrscr();
+	} while (key != 13);
+	return selection;
+}
+
 void paintGrid(const char g[][SIZEX], const vector<Bear>& bears)
 { //display grid content on screen
 	Gotoxy(0, 4);
@@ -846,13 +1098,13 @@ void paintGrid(const char g[][SIZEX], const vector<Bear>& bears)
 					{
 						if (bear.x == col && bear.y == row && bear.invincible)
 						{
-						SelectBackColour(clBlack);
+					SelectBackColour(clBlack);
 							SelectTextColour(clMagenta);
-						break;
+					break;
 						}
 						else
 						{
-						SelectBackColour(clBlack);
+					SelectBackColour(clBlack);
 							SelectTextColour(clGreen);
 						}
 					}
@@ -892,9 +1144,14 @@ string makeLength(string s, int length)
 	return s;
 }
 
+bool compareScore(const Player player1, const Player player2)
+{
+	return (player1.score < player2.score);
+}
+
 void endProgram()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	showMessage(clRed, clYellow, 40, 10, "");	//hold output screen until a keyboard key is hit
+	showMessage(clRed, clYellow, 4, 1, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
