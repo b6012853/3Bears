@@ -165,10 +165,11 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 	bool wantsToQuit(const int key);
 	bool isCheatKey(const char key);
 	bool isArrowKey(const int k);
-	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill, Item& lock, Item& lKey);
+	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill, Item& lock, Item& lKey, int& level);
 	void savePlayer(const Player& player);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator, Pill& pill, Item& lock, Item& lKey);
 	void saveHighscores(vector<Player>& highscores);
+	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 
 	bool gameEnd = false;
 	bool showRules = false;
@@ -205,8 +206,9 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 			}
 			else if (isArrowKey(key))
 			{
-				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player, pill, lock, lKey);		//move bear in that direction
-				if (bears.empty())
+				gameEnd = updateGameData(grid, bears, bombs, detonator, key, message, noOfMoves, player, pill, lock, lKey, level);		//move bear in that direction
+				
+				if (bears.empty() && level == 3)
 				{
 					if (player.score > noOfMoves && !player.cheated) //If the new score is lower and they haven't cheated
 					{
@@ -242,7 +244,8 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 		}
 		else
 		{
-				getKeyPress();
+			getKeyPress();
+			showMessage(clBlack, clWhite, 40, 9, "                                      ");
 		}
 	}
 		
@@ -494,7 +497,7 @@ void placePill(char g[][SIZEX], Pill& pill)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill, Item& lock, Item& lKey)
+bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player, Pill& pill, Item& lock, Item& lKey, int& level)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -599,6 +602,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 				if (!(player.cheating || bear.invincible))
 				{
 					gameEnd = true;
+					level = 3;
 					mess = "You just killed a bear, you sad person!  ";
 					showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
 					maze[bear.y][bear.x] = TUNNEL;
@@ -704,7 +708,7 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 	if (bears.empty())
 	{
 		gameEnd = true;
-		showMessage(clBlack, clWhite, 40, 9, "Press any key to return to the main menu.");
+		showMessage(clBlack, clWhite, 40, 9, "LEVEL COMPLETE! Press any key.");
 	}
 	if (!player.cheated)
 	{
@@ -837,9 +841,7 @@ vector<Player> loadHighscore()
 			if (fin)
 			{
 				fin >> tempPlayer.name;
-				//fin.get();
 				fin >> tempPlayer.score;
-				//fin.get();
 			}
 			else
 			{
@@ -1100,13 +1102,13 @@ void paintGrid(const char g[][SIZEX], const vector<Bear>& bears)
 					{
 						if (bear.x == col && bear.y == row && bear.invincible)
 						{
-					SelectBackColour(clBlack);
+							SelectBackColour(clBlack);
 							SelectTextColour(clMagenta);
-					break;
+							break;
 						}
 						else
 						{
-					SelectBackColour(clBlack);
+							SelectBackColour(clBlack);
 							SelectTextColour(clGreen);
 						}
 					}
