@@ -314,41 +314,13 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears,
 	setInitialDataFromMaze(maze, bears, bombs, detonator, lock, key);	//initialise bear's position
 	updateGrid(grid, maze, bears, bombs, detonator, pill, lock, key);		//prepare grid
 }
-
-void setInitialMazeStructure(char maze[][SIZEX])
-{ //set the position of the walls in the maze
-	//initialise maze configuration
-	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		    { 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1},
-			{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-			{ 1, 2, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1},
-			{ 1, 0, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
-			{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
-			{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1},
-			{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-			{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
-	// with 1 for wall, 0 for tunnel, etc. 
-	//copy into maze structure
-	for (int row(0); row < SIZEY; ++row)	
-		for (int col(0); col < SIZEX; ++col)
-			switch (initialMaze[row][col])
-			{
-				case 0: maze[row][col] = TUNNEL; break;
-				case 1: maze[row][col] = WALL; break;
-				case 2: maze[row][col] = BEAR; break;
-				case 3: maze[row][col] = BOMB; break;
-				case 4: maze[row][col] = DETONATOR; break;
-				case 5: maze[row][col] = EXIT; break;
-			}
-}
 void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Item& lock, Item& key)
 { //extract bear's coordinates from initial maze info
 	int noOfBears = 0;
 	int noOfBombs = 0;
 	detonator.visible = false;
+	detonator.x = -1;
+	detonator.y = -1;
 	lock.visible = false;
 	key.visible = false;
 	for (int row(0); row < SIZEY; ++row)
