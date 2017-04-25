@@ -18,6 +18,7 @@
 #include <vector>
 #include <fstream>
 #include <direct.h>
+#include <algorithm>
 using namespace std;
 
 //include our own libraries
@@ -78,16 +79,19 @@ int main()
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	int paintMainMenu();
-	void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player);
+	void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores);
 	string paintEntryScreen();
 	Player player;
 	Player loadPlayer(const string playerName);
+	vector<Player> loadHighscore();
+
 	
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];	//grid for display
 	char maze[SIZEY][SIZEX];	//structure of the maze
 	string message("LET'S START...");	//current message to player
+	vector<Player> highscores = loadHighscore();
 	vector<Bear> bears;
 	bears.push_back(Bear());
 	bears.push_back(Bear());
@@ -118,15 +122,15 @@ int main()
 		switch (selection)
 		{
 		case 1:
-			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player);
+			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores);
 			break;
 		case 2:
 			void displayRules();
 			displayRules();
 			break;
 		case 3:
-			void displayHighscore(Player player);
-			displayHighscore(player);
+			void displayHighscore(const Player& player, const vector<Player>& highscores);
+			displayHighscore(player, highscores);
 			break;
 		default:
 			break;
@@ -137,7 +141,7 @@ int main()
 	return 0;
 }
 
-void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player)
+void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores)
 {
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator);
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules);
@@ -148,6 +152,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 	bool updateGameData(const char g[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, const int key, string& mess, int& numberOfMoves, const Player& player);
 	void savePlayer(const Player& player);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const vector<Bear> bear, const vector<Item> bombs, const Item detonator);
+	void saveHighscores(vector<Player>& highscores);
 
 	bool forceQuit = false;
 	bool showRules = false;
@@ -179,6 +184,11 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 						player.score = noOfMoves; //Change their player record
 						savePlayer(player);		  //And update their file.
 					}
+					if (player.score < highscores.at(5).score)
+					{
+						highscores.at(5) = player;
+						saveHighscores(highscores);
+					}
 				}
 				updateGrid(grid, maze, bears, bombs, detonator);	//update grid information
 			}
@@ -207,15 +217,22 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 	Clrscr();
 }
 
-void displayHighscore(Player player)
+void displayHighscore( const Player& player, const vector<Player>& highscores )
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	string makeLength(string s, int length);
 	int getKeyPress();
-
+	
 	showMessage(clDarkGrey, clYellow, 8, 1, " CURRENT PLAYER: " + makeLength(player.name, 24));
 	showMessage(clDarkGrey, clYellow, 8, 2, " PREVIOUS SCORE: " + makeLength(to_string(player.score), 24));
-	showMessage(clBlack, clWhite, 8, 4, " Press any key to return.");
+	showMessage(clDarkGrey, clYellow, 8, 4, makeLength(" HIGHSCORES ", 24));
+	showMessage(clDarkGrey, clYellow, 8, 5, makeLength(" 1:  " + highscores.at(0).name + " - " + to_string(highscores.at(0).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 6, makeLength(" 2:  " + highscores.at(1).name + " - " + to_string(highscores.at(1).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 7, makeLength(" 3:  " + highscores.at(2).name + " - " + to_string(highscores.at(2).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 8, makeLength(" 4:  " + highscores.at(3).name + " - " + to_string(highscores.at(3).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 9, makeLength(" 5:  " + highscores.at(4).name + " - " + to_string(highscores.at(4).score), 24));
+	showMessage(clDarkGrey, clYellow, 8, 10, makeLength(" 6:  " + highscores.at(5).name + " - " + to_string(highscores.at(5).score), 24));
+	showMessage(clBlack, clWhite, 8, 12, " Press any key to return.");
 	Gotoxy(0, 0);
 
 	getKeyPress();
@@ -632,6 +649,70 @@ void savePlayer(const Player& player)
 	}
 }
 
+vector<Player> loadHighscore()
+{
+	bool compareScore(const Player player1, const Player player2);
+	const string fileName = playerFileLocation + "bestScores" + playerFileType;
+	vector<Player> highscores;
+	Player tempPlayer;
+	ifstream fin(fileName, ios::in); //Open the file
+	const int maxHighscores = 6;		//The maximum number of highscores that can be stored
+	if (fin.fail())	//Check if the open was successful.
+	{
+		void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+		showMessage(clRed, clYellow, 0, 20, "Failed to open file: " + fileName);
+	}
+	else
+	{
+		//File open successfully, load the values from the file.
+		for (int scores = 0; scores < maxHighscores; scores++)
+		{
+			if (fin)
+			{
+				fin >> tempPlayer.name;
+				//fin.get();
+				fin >> tempPlayer.score;
+				//fin.get();
+			}
+			else
+			{
+				tempPlayer.name = "anonymous";
+				tempPlayer.score = 500;
+			}
+			highscores.push_back(tempPlayer);
+		}
+		fin.close();
+	}
+	sort(highscores.begin(), highscores.end(), compareScore);
+	return highscores;
+}
+
+void saveHighscores(vector<Player>& highscores)
+{
+	bool compareScore(const Player player1, const Player player2);
+	const string fileName = playerFileLocation + "bestScores" + playerFileType;
+	ofstream fout(fileName, ios::out);
+	const int highscoresSize = highscores.size();
+	int player = 0;
+
+	if (fout.fail())	//Check if the open was successful.
+	{
+		void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
+		showMessage(clRed, clYellow, 0, 20, "Failed to save file: " + fileName);
+	}
+	else
+	{
+		//Save the required data in the file.
+		for (player; player < highscoresSize; player++)
+		{
+			fout << highscores.at(player).name << endl;
+			fout << highscores.at(player).score << endl;
+		}
+		fout.close();
+	}
+	sort(highscores.begin(), highscores.end(), compareScore);
+}
+
 //---------------------------------------------------------------------------
 //----- display info on screen
 //---------------------------------------------------------------------------
@@ -782,7 +863,7 @@ int paintMainMenu()
 	string MenuItems[noOfMenuItems] =
 	{ "Start Game",			//To add new menu items:
 	  "Rules",				//   -Adjust the noOfMenuItems accordingly
-	  "Previous Score",		//   -Add it to this array
+	  "Highscores",		//   -Add it to this array
 	  "Quit" };				//The loops below will handle the render and selection. Change the switch in the caller to change behaviour.
 	int selection = 1;
 
@@ -868,6 +949,11 @@ string makeLength(string s, int length)
 		s.append(" ");
 	}
 	return s;
+}
+
+bool compareScore(const Player player1, const Player player2)
+{
+	return (player1.score < player2.score);
 }
 
 void endProgram()
