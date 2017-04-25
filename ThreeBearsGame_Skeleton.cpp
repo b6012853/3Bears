@@ -50,6 +50,7 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 const char CHEAT('C');		//To activate cheat mode
+const char UNLOCK('U');
 //Add global key here for rules (Liam).
 
 const string playerFileLocation = "players\\";
@@ -93,8 +94,9 @@ int main()
 	//function declarations (prototypes)
 	void endProgram();
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	int paintMainMenu();
-	void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores, Pill& pill, Item& lock, Item& lKey);
+	int paintMainMenu(int& unlockedLevels);
+	int getKeyPress();
+	void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores, Pill& pill, Item& lock, Item& lKey, int& level, int& unlockedLevels);
 	string paintEntryScreen();
 	Player player;
 	Player loadPlayer(const string playerName);
@@ -122,7 +124,9 @@ int main()
 	}
 
 	int noOfMoves(0);
-
+	int level;
+	int unlockedLevels = 1;
+	
 	//Entry screen
 	if (_mkdir(playerFileLocation.c_str()) == 0) //If the players folder doesn't exist create it.
 	{
@@ -133,32 +137,48 @@ int main()
 	int selection;
 
 	do {
-		selection = paintMainMenu();
+		
+		selection = paintMainMenu(unlockedLevels);
+
 		switch (selection)
 		{
 		case 1:
+			level = 1;
 			for (int b = 0; b < 3; b++) //b for bears
 				bears.push_back(Bear());
-			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores, pill, lock, lKey);
+			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores, pill, lock, lKey, level, unlockedLevels);
 			break;
 		case 2:
+			if (unlockedLevels < 2)
+			{
+				showMessage(clBlack, clWhite, 8, 10, "That level has not been unlocked yet!");
+			}
+			else
+			{
+				level = 2;
+				for (int b = 0; b < 3; b++) //b for bears
+					bears.push_back(Bear());
+				playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores, pill, lock, lKey, level, unlockedLevels);
+			}
+			break;
+		case 3:
 			void displayRules();
 			displayRules();
 			break;
-		case 3:
+		case 4:
 			void displayHighscore(const Player& player, const vector<Player>& highscores);
 			displayHighscore(player, highscores);
 			break;
 		default:
 			break;
 		}
-	} while (selection != 4);
+	} while (selection != 5);
 	
 	endProgram();						//display final message
 	return 0;
 }
 
-void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores, Pill& pill, Item& lock, Item& lKey)
+void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores, Pill& pill, Item& lock, Item& lKey, int& level, int& unlockedLevels)
 {
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& lKey, int level);
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules, const vector<Bear>& bear);
@@ -174,7 +194,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 
 	bool gameEnd = false;
 	bool showRules = false;
-	int level = 1;
+	
 	//action...
 	initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey, level);		//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);	//display game info, modified grid & messages
@@ -185,6 +205,10 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 		{
 			gameEnd = false;
 			level += 1;
+			if (unlockedLevels < 2)
+			{
+				unlockedLevels = 2;
+			}
 			if (level <= 2)
 			{
 				for (int b = 0; b < 3; b++) //b for bears
@@ -1039,11 +1063,12 @@ string paintEntryScreen()
 	return finalName;
 }
 
-int paintMainMenu()
+int paintMainMenu(int& unlockedLevels)
 {
-	const int noOfMenuItems = 4;
+	const int noOfMenuItems = 5;
 	string MenuItems[noOfMenuItems] =
-	{ "Start Game",			//To add new menu items:
+	{ "Level 1",			//To add new menu items:
+	  "Level 2",
 	  "Rules",				//   -Adjust the noOfMenuItems accordingly
 	  "Highscores",		//   -Add it to this array
 	  "Quit" };				//The loops below will handle the render and selection. Change the switch in the caller to change behaviour.
@@ -1067,8 +1092,16 @@ int paintMainMenu()
 
 		if (key == UP && selection > 1)
 			selection--;
-		else if (key == DOWN && selection < 4)
+		else if (key == DOWN && selection < noOfMenuItems)
 			selection++;
+		else if (key == UNLOCK)
+		{
+			if (key == UNLOCK)
+			{
+				unlockedLevels = 100;
+				showMessage(clBlack, clWhite, 8, 10, "All levels unlocked!");
+			}
+		}
 
 		//Output selector
 		Gotoxy(6, selection + 3); //Menu options start from line 4, take into account selection starts counting from 1, so we must add 3 to render on the correct line.
