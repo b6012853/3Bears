@@ -159,7 +159,7 @@ int main()
 
 void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, string& message, int& noOfMoves, Player& player, vector<Player>& highscores, Pill& pill, Item& lock, Item& lKey)
 {
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& lKey);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Bear>& bear, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& lKey, int level);
 	void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves, Player player, bool showRules, const vector<Bear>& bear);
 	int getKeyPress();
 	bool wantsToQuit(const int key);
@@ -172,13 +172,26 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 
 	bool gameEnd = false;
 	bool showRules = false;
-
+	int level = 1;
 	//action...
-	initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey);		//initialise grid (incl. walls & bear)
+	initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey, level);		//initialise grid (incl. walls & bear)
 	paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);	//display game info, modified grid & messages
 	int key(getKeyPress()); 									//read in selected key: arrow or letter command
-	while (!wantsToQuit(key) && !gameEnd)						//while user does not want to quit
+	while (!wantsToQuit(key) && !(gameEnd && (level == 3)))						//while user does not want to quit
 	{
+		if (gameEnd)
+		{
+			gameEnd = false;
+			level += 1;
+			if (level <= 2)
+			{
+				for (int b = 0; b < 3; b++) //b for bears
+					bears.push_back(Bear());
+				initialiseGame(grid, maze, bears, bombs, detonator, pill, lock, lKey, level);	//initialise grid (incl. walls & bear)
+				paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);			//display game info, modified grid & messages
+				int key(getKeyPress()); 			//read in  selected key: arrow or letter command
+			}
+		}
 		if (key != 'F' && !showRules)
 		{
 			if (isCheatKey(key))
@@ -200,8 +213,8 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 						player.score = noOfMoves; //Change their player record
 						savePlayer(player);		  //And update their file.
 					}
-					if (player.score < highscores.at(5).score)
 					{
+					if (player.score < highscores.at(5).score)
 						highscores.at(5) = player;
 						saveHighscores(highscores);
 					}
@@ -281,7 +294,7 @@ void displayRules()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& key)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Pill& pill, Item& lock, Item& key, int level)
 { //initialise grid & place bear in middle
 	void loadLevel(int LevelNo, char maze[][SIZEX]);
 	void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item>& bombs, Item& detonator, Item& lock, Item& key);
@@ -297,7 +310,7 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears,
 	detonator.visible = false;
 	lock.visible = false;
 
-	loadLevel(2, maze); //initialsie maze
+	loadLevel(level, maze); //initialsie maze
 	setInitialDataFromMaze(maze, bears, bombs, detonator, lock, key);	//initialise bear's position
 	updateGrid(grid, maze, bears, bombs, detonator, pill, lock, key);		//prepare grid
 }
