@@ -195,6 +195,7 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears,
 	pill.item.x = 0;
 	pill.item.y = 0;
 
+	detonator.visible = false;
 	//setInitialMazeStructure(maze);		//initialise maze
 	loadLevel(1, maze);
 	setInitialDataFromMaze(maze, bears, bombs, detonator);	//initialise bear's position
