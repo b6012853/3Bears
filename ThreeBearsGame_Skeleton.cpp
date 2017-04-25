@@ -499,11 +499,13 @@ bool updateGameData(const char g[][SIZEX], vector<Bear>& bears, vector<Item>& bo
 					}
 					for (int b = 0; b < noOfBombs; b++)
 					{
-						if (bear.y == bombs[b].y && bear.x == bombs[b].x)
-							bombs[b].visible = false;
-						else
+						if (!(bear.y == bombs[b].y && bear.x == bombs[b].x))
+						{
 							if (!bear.moved)
-								maze[bear.y][bear.x] = TUNNEL;
+							{
+								maze[bear.y][bear.x] = TUNNEL; bombs[b].visible = false;
+							}
+						}
 					}
 				}
 				break;
