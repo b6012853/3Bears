@@ -108,8 +108,7 @@ int main()
 	string message("LET'S START...");	//current message to player
 	vector<Player> highscores = loadHighscore();
 	vector<Bear> bears;
-	for (int b = 0; b < 3; b++) //b for bears
-	bears.push_back(Bear());
+	
 
 	srand(time(NULL));
 	Pill pill;
@@ -138,6 +137,8 @@ int main()
 		switch (selection)
 		{
 		case 1:
+			for (int b = 0; b < 3; b++) //b for bears
+				bears.push_back(Bear());
 			playGame(grid, maze, bears, bombs, detonator, message, noOfMoves, player, highscores, pill, lock, lKey);
 			break;
 		case 2:
@@ -795,7 +796,7 @@ Player loadPlayer(const string playerName)
 	{
 		//File open successfully, load the values from the file.
 		fin >> p.name; fin.get();
-		fin >> p.score;
+		p.score = 500;
 		fin.close();
 	}
 	return p;
