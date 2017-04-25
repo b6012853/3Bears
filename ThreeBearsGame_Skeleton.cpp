@@ -219,7 +219,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 				int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 			}
 		}
-		if (key != RULES && !showRules)
+		else if (key != RULES && !showRules)
 		{
 			if (isCheatKey(key))
 			{
