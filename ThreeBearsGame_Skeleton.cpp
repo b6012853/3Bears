@@ -50,7 +50,8 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 const char CHEAT('C');		//To activate cheat mode
-const char UNLOCK('U');
+const char UNLOCK('U');		//To unlock all levels
+const char RULES('F');		//To display rules
 //Add global key here for rules (Liam).
 
 const string playerFileLocation = "players\\";
@@ -218,7 +219,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 				int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 			}
 		}
-		if (key != 'F' && !showRules)
+		if (key != RULES && !showRules)
 		{
 			if (isCheatKey(key))
 			{
@@ -251,7 +252,7 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 				updateGrid(grid, maze, bears, bombs, detonator, pill, lock, lKey);			//update grid information
 			}
 		}
-		else if (key == 'F')
+		else if (key == RULES)
 		{
 			if (!showRules)
 				showRules = true;
