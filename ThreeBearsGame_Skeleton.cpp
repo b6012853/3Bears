@@ -324,55 +324,57 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Bear>& bears, vector<Item
 	lock.visible = false;
 	key.visible = false;
 	for (int row(0); row < SIZEY; ++row)
+	{
 		for (int col(0); col < SIZEX; ++col)
 			switch (maze[row][col])
+		{
+			case BEAR:
 			{
-				case BEAR:
-				{
-					bears[noOfBears].x = col;
-					bears[noOfBears].y = row;
-					bears[noOfBears].symbol = BEAR;
-					bears[noOfBears].visible = true;
-					bears[noOfBears].invincible = false;
-					noOfBears++;
-					maze[row][col] = TUNNEL;
-					break;
-				}
-				case DETONATOR:
-				{		
-					detonator.x = col;
-					detonator.y = row;
-					detonator.symbol = DETONATOR;
-					detonator.visible = true;
-					detonator.active = false;
-					maze[row][col] = TUNNEL;
-					break;
-				}
-				case BOMB:
-				{
-					bombs[noOfBombs].x = col;
-					bombs[noOfBombs].y = row;
-					bombs[noOfBombs].symbol = BOMB;
-					bombs[noOfBombs].visible = true;
-					noOfBombs++;
-					maze[row][col] = TUNNEL;
-					break;
-				}
-				case LOCK:
-					lock.x = col;
-					lock.y = row;
-					lock.symbol = LOCK;
-					lock.visible = true;
-					lock.active = true;
-					break;
-				case KEY:
-					key.x = col;
-					key.y = row;
-					key.symbol = KEY;
-					key.visible = true;
-					break;
-				}
+				bears[noOfBears].x = col;
+				bears[noOfBears].y = row;
+				bears[noOfBears].symbol = BEAR;
+				bears[noOfBears].visible = true;
+				bears[noOfBears].invincible = false;
+				noOfBears++;
+				maze[row][col] = TUNNEL;
+				break;
 			}
+			case DETONATOR:
+			{
+				detonator.x = col;
+				detonator.y = row;
+				detonator.symbol = DETONATOR;
+				detonator.visible = true;
+				detonator.active = false;
+				maze[row][col] = TUNNEL;
+				break;
+			}
+			case BOMB:
+			{
+				bombs[noOfBombs].x = col;
+				bombs[noOfBombs].y = row;
+				bombs[noOfBombs].symbol = BOMB;
+				bombs[noOfBombs].visible = true;
+				noOfBombs++;
+				maze[row][col] = TUNNEL;
+				break;
+			}
+			case LOCK:
+				lock.x = col;
+				lock.y = row;
+				lock.symbol = LOCK;
+				lock.visible = true;
+				lock.active = true;
+				break;
+			case KEY:
+				key.x = col;
+				key.y = row;
+				key.symbol = KEY;
+				key.visible = true;
+				break;
+		}
+	}
+}
 void loadLevel(int LevelNo, char maze[][SIZEX])
 {
 	ifstream level;
