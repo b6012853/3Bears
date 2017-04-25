@@ -213,38 +213,41 @@ void playGame(char grid[][SIZEX], char maze[][SIZEX], vector<Bear>& bears, vecto
 						player.score = noOfMoves; //Change their player record
 						savePlayer(player);		  //And update their file.
 					}
-					{
+
 					if (player.score < highscores.at(5).score)
+					{
 						highscores.at(5) = player;
 						saveHighscores(highscores);
 					}
-					
+
 				}
 				updateGrid(grid, maze, bears, bombs, detonator, pill, lock, lKey);			//update grid information
 			}
-			else if (key == 'F')
-			{
-				if (!showRules)
-					showRules = true;
-				else
-					showRules = false;
-			}
-			else
-				message = "INVALID KEY!";  //set 'Invalid key' message
-
-			paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);	//display game info, modified grid & messages
-
-			if (!gameEnd)
-			{
-				key = getKeyPress(); 		   //display menu & read in next option
-			}
-			else
-			{
-				getKeyPress();
-			}
 		}
-		Clrscr();
+		else if (key == 'F')
+		{
+			if (!showRules)
+				showRules = true;
+			else
+				showRules = false;
+		}
+		else
+			message = "INVALID KEY!";  //set 'Invalid key' message
+
+		paintGame(grid, message, bears.size(), noOfMoves, player, showRules, bears);	//display game info, modified grid & messages
+
+		if (!gameEnd)
+		{
+			key = getKeyPress(); 		   //display menu & read in next option
+		}
+		else
+		{
+				getKeyPress();
+		}
 	}
+		
+	
+	Clrscr();
 }
 
 void displayHighscore(const Player& player, const vector<Player>& highscores)
@@ -938,10 +941,14 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 	showMessage(clDarkGrey, clWhite, 0, SIZEY + 7, makeLength("DETONATOR", 15));
 	SelectTextColour(clYellow);
 	cout << DETONATOR;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("POWER UP PILL", 15));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 8, makeLength("LOCK", 15));
+	cout << LOCK;
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 9, makeLength("KEY", 15));
+	cout << KEY;
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 10, makeLength("POWER UP PILL", 15));
 	SelectTextColour(clMagenta);
 	cout << PILL;
-	showMessage(clDarkGrey, clWhite, 0, SIZEY + 9, makeLength("EXIT", 15));
+	showMessage(clDarkGrey, clWhite, 0, SIZEY + 11, makeLength("EXIT", 15));
 	SelectBackColour(clGrey);
 	SelectTextColour(clBlack);
 	cout << EXIT;
@@ -952,14 +959,16 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 
 	if (showRules)
 	{
-	showMessage(clDarkGrey, clWhite, 40, 13, " GAME LEVEL 1 RULES:                ");
+	showMessage(clDarkGrey, clWhite, 40, 13, " GAME RULES:                        ");
 	showMessage(clDarkGrey, clWhite, 40, 14, " Rescue all bears '@' through       ");
 	showMessage(clDarkGrey, clWhite, 40, 15, " exit 'X' avoiding bombs 'O'        ");
 	showMessage(clDarkGrey, clWhite, 40, 16, " To disable bombs use detonator 'T' ");
-	showMessage(clDarkGrey, clWhite, 40, 17, "                                    ");
-	showMessage(clDarkGrey, clWhite, 40, 18, " TO MOVE USE ARROW KEYS             ");
-	showMessage(clDarkGrey, clWhite, 40, 19, " TO QUIT ENTER 'Q'                  ");
-		showMessage(clBlack, clWhite, 40, 21, "Game paused... press 'F' to resume.");
+	showMessage(clDarkGrey, clWhite, 40, 17, " To open locks 'L' use key 'K'      ");
+	showMessage(clDarkGrey, clWhite, 40, 18, "                                    ");
+	showMessage(clDarkGrey, clWhite, 40, 19, " TO MOVE USE ARROW KEYS             ");
+	showMessage(clDarkGrey, clWhite, 40, 20, " TO QUIT ENTER 'Q'                  ");
+	showMessage(clDarkGrey, clWhite, 40, 21, " TO ACTIVATE CHEATMODE ENTER 'C'    ");
+	   showMessage(clBlack, clWhite, 40, 23, " Game paused... press 'F' to resume ");
 	}
 	else
 	{
@@ -970,7 +979,9 @@ void paintGame(const char g[][SIZEX], string mess, int noOfBears, int noOfMoves,
 		showMessage(clBlack, clWhite, 40, 17, "                                    ");
 		showMessage(clBlack, clWhite, 40, 18, "                                    ");
 		showMessage(clBlack, clWhite, 40, 19, "                                    ");
+		showMessage(clBlack, clWhite, 40, 20, "                                    ");
 		showMessage(clBlack, clWhite, 40, 21, "                                    ");
+		showMessage(clBlack, clWhite, 40, 23, "                                    ");
 	}
 
 	//print auxiliary messages if any
